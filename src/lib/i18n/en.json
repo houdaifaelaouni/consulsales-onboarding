@@ -1,0 +1,10 @@
+{
+  "login.title": "Sign in",
+  "login.subtitle": "We email you a one-time link. No password.",
+  "login.email": "Work email",
+  "login.submit": "Send magic link",
+  "login.sent": "Check your inbox. The link works once and expires in 24 hours.",
+  "login.error": "Could not send the link. Check the address and try again.",
+  "app.welcome": "Welcome",
+  "app.signout": "Sign out"
+}
