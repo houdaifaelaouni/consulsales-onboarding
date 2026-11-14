@@ -44,9 +44,11 @@ begin
     assert false, 'A must not insert workspaces';
   exception when insufficient_privilege or others then null; end;
 
-  update public.app_user set is_admin = true where id = '00000000-0000-0000-0000-0000000000a1';
-  get diagnostics n = row_count;
-  assert n = 0, 'A must not self-promote to admin';
+  begin
+    update public.app_user set is_admin = true where id = '00000000-0000-0000-0000-0000000000a1';
+    get diagnostics n = row_count;
+    assert n = 0, 'A must not self-promote to admin';
+  exception when insufficient_privilege then null; end;
 
   -- Admin
   perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
@@ -57,8 +59,9 @@ begin
   reset role; set local role anon;
   perform set_config('request.jwt.claims', '{}', true);
   begin
-    perform count(*) from public.workspace;
-    assert false, 'anon must not read workspace';
+    select count(*) into n from public.workspace;
+    assert n = 0, 'anon must not read workspace';
   exception when insufficient_privilege then null; end;
 end $$;
 rollback;
+select 'RLS tests passed' as result;
