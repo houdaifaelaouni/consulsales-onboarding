@@ -13,8 +13,8 @@ export interface BookingStore {
 
 type Phase = "pick" | "booking" | "done";
 
-export function BookingPicker({ plan, now, booked, store, fallbackUrl }: {
-  plan: BookingPlan; now: string; booked: string[]; store: BookingStore; fallbackUrl?: string;
+export function BookingPicker({ plan, now, booked, store, fallbackUrl, onBooked }: {
+  plan: BookingPlan; now: string; booked: string[]; store: BookingStore; fallbackUrl?: string; onBooked?: (slotIso: string) => void;
 }) {
   const minutes = KICKOFF_MINUTES[plan];
   const [tz, setTz] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export function BookingPicker({ plan, now, booked, store, fallbackUrl }: {
   async function confirm() {
     if (!slot) return;
     setPhase("booking"); setFailed(false);
-    try { const r = await store.book(slot); setBookingId(r.id); setPhase("done"); }
+    try { const r = await store.book(slot); setBookingId(r.id); setPhase("done"); onBooked?.(slot); }
     catch { setFailed(true); setPhase("pick"); }
   }
 
