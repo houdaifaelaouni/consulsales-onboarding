@@ -11,8 +11,6 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const client = findClient(id);
   if (!client) notFound();
   return (
-    <main className="mx-auto max-w-xl px-4 py-8 sm:py-12">
-      <ClientDetail client={client} now={ADMIN_NOW} />
-    </main>
+    <ClientDetail client={client} now={ADMIN_NOW} />
   );
 }
