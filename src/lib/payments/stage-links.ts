@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { PLANS, type PlanKey } from "@/lib/plans";
+import { PLANS, stagePrice, type PlanKey, type StageOverrides } from "@/lib/plans";
 import type { PaymentProvider } from "./types";
 
 type Db = ReturnType<typeof createAdminClient>;
@@ -8,8 +8,8 @@ type Db = ReturnType<typeof createAdminClient>;
  * Gives every unlocked, unpaid invoice (stage 1 to open the workspace, 2 and 3 when approved) its price and its secure payment link. Called when the client opens the
  * payments page, so a link exists the moment the work is approved. Only fills what is empty, so repeating it is harmless.
  */
-export async function ensureStageLinks(opts: { db: Db; provider: PaymentProvider; workspaceId: string; plan: PlanKey; appUrl: string }): Promise<void> {
-  const { db, provider, workspaceId, plan, appUrl } = opts;
+export async function ensureStageLinks(opts: { db: Db; provider: PaymentProvider; workspaceId: string; plan: PlanKey; overrides?: StageOverrides; appUrl: string }): Promise<void> {
+  const { db, provider, workspaceId, plan, overrides, appUrl } = opts;
   // With a saved card the charge is automatic, so a pay link is only offered after a charge failed (never both at once, so no
   // double payment). Without a saved card the client pays by link.
   const { data: bill } = await db.from("billing_account").select("workspace_id").eq("workspace_id", workspaceId).maybeSingle();
@@ -20,7 +20,7 @@ export async function ensureStageLinks(opts: { db: Db; provider: PaymentProvider
   if (error || !rows?.length) return;
   const cfg = PLANS[plan];
   for (const { stage } of rows as Array<{ stage: number }>) {
-    const amount = cfg.stagePrices[stage - 1];
+    const amount = stagePrice(plan, stage, overrides);
     if (!amount) continue;
     try {
       const checkout = await provider.createCheckout({

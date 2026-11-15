@@ -8,13 +8,13 @@ export function createSupabaseChargeRepo(): ChargeRepo {
   return {
     async loadAccount(workspaceId) {
       const [ws, bill] = await Promise.all([
-        db.from("workspace").select("plan").eq("id", workspaceId).maybeSingle(),
+        db.from("workspace").select("plan,stage_price_cents").eq("id", workspaceId).maybeSingle(),
         db.from("billing_account").select("member_id,payment_method_id").eq("workspace_id", workspaceId).maybeSingle(),
       ]);
       if (ws.error) throw ws.error;
       if (bill.error) throw bill.error;
       if (!ws.data || !bill.data || !isPlanKey(ws.data.plan)) return null;
-      return { plan: ws.data.plan, memberId: bill.data.member_id as string, paymentMethodId: bill.data.payment_method_id as string };
+      return { plan: ws.data.plan, overrides: (ws.data.stage_price_cents as Array<number | null> | null) ?? null, memberId: bill.data.member_id as string, paymentMethodId: bill.data.payment_method_id as string };
     },
     async listUnpaid(workspaceId) {
       const { data, error } = await db.from("invoice").select("stage,charge_attempts,charge_attempted_at,charge_error").eq("workspace_id", workspaceId).in("stage", [2, 3]).is("paid_at", null);
