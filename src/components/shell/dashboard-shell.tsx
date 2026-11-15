@@ -60,7 +60,7 @@ export function DashboardShell({ items, homeHref, user, canSignOut = false, foot
       className="flex h-full w-full max-w-full flex-col justify-between overflow-auto bg-primary pt-4 lg:w-(--width) lg:pt-5 border-secondary md:border-r"
     >
       <div className="px-4 lg:px-5">
-        <Link href={homeHref} aria-label="ConsulSales"><Logo /></Link>
+        <Link href={homeHref}><Logo /></Link>
       </div>
       <nav aria-label={t("nav.main")}>
         <NavList activeUrl={activeHref(pathname, items)} items={navItems} />

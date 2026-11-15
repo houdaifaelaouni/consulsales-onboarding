@@ -1,31 +1,11 @@
-import Link from "next/link";
-import { Card } from "@/components/ui";
+import { ClientDashboard } from "@/components/dashboard/client-dashboard";
+import { DEMO_NOW, DEMO_TASKS } from "@/lib/dashboard/sample";
 
-const SCREENS = [
-  { href: "/demo/intake", title: "Guided intake", note: "Four steps, autosave, resume, not-sure answers" },
-  { href: "/demo/access", title: "Access and assets", note: "CRM connect, secure credentials, booking link, brand files" },
-  { href: "/demo/review", title: "Review and approve", note: "Inline comments, version diff, LinkedIn preview, approval" },
-  { href: "/demo/payments", title: "Stage payments", note: "Invoices that appear only after approval, due dates, reminders" },
-  { href: "/demo/admin", title: "Admin board", note: "Every client by stage, blocker flags on top, client detail" },
-  { href: "/demo/booking", title: "Kickoff booking", note: "Plan-specific call length, local time zone, calendar file" },
-];
-
-export default function DemoIndex() {
+export default function DemoOverview() {
   return (
-    <main className="mx-auto max-w-xl space-y-6 px-4 py-10">
-      <h1 className="text-[28px] font-semibold tracking-[-0.6px]">Screens</h1>
-      <ul className="space-y-3">
-        {SCREENS.map((s) => (
-          <li key={s.href}>
-            <Link href={s.href}>
-              <Card className="transition-colors hover:bg-surface-2">
-                <h2 className="text-[22px] font-medium tracking-[-0.4px]">{s.title}</h2>
-                <p className="text-ink-muted">{s.note}</p>
-              </Card>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <ClientDashboard
+      name="Sara" company="Studio North" startDate="2026-11-13" now={new Date(DEMO_NOW)} tasks={DEMO_TASKS}
+      links="demo" nextPayment={{ amount: "€900", due: "Due in 4 days, after your profile approval" }}
+    />
   );
 }
