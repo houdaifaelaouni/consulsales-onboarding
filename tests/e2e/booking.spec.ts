@@ -29,7 +29,7 @@ test("booking: plan changes the call length, and a failed booking shows an error
   await page.getByText("Simulate a failed booking").click();
   await page.getByRole("group", { name: "Choose a time" }).getByRole("button").first().click();
   await page.getByRole("button", { name: "Confirm booking" }).click();
-  await expect(page.getByRole("alert")).toContainText("We could not book that time");
+  await expect(page.getByRole("alert").filter({ hasText: "We could not book that time" })).toBeVisible(); // Next.js adds its own empty route-announcer alert
   await expect(page.getByRole("link", { name: "Use our booking page instead" })).toBeVisible();
 });
 
