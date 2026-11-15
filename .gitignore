@@ -42,3 +42,6 @@ next-env.d.ts
 .env.local
 test-results/
 playwright-report/
+
+# Confidential planning docs stay local
+docs/*.pdf
