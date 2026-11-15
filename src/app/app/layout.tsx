@@ -15,7 +15,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const appUrl = () => process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 
-/** Client side. No payment, no workspace: an owner whose stage 1 is unpaid sees only the pay screen. Staff also get a link to the admin side. */
+/** Client side. No payment, no workspace: a client whose stage 1 is unpaid sees only the pay screen. Staff (the founder, admins,
+ * delivery leads) never pay and are never stopped here; they also get a link to the admin side. */
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
@@ -23,7 +24,7 @@ export default async function ClientLayout({ children }: { children: React.React
   const supabase = await createClient();
   const { data: m } = await supabase.from("membership").select("workspace_id").eq("user_id", viewer.id).eq("role", "client_owner").limit(1);
   const workspaceId = m?.[0]?.workspace_id as string | undefined;
-  if (workspaceId) {
+  if (workspaceId && !isStaff(viewer)) {
     const { data: inv } = await supabase.from("invoice").select("stage,paid_at,pay_url").eq("workspace_id", workspaceId);
     if (!hasPaidEntry(inv)) {
       let payUrl = (inv?.find((r) => r.stage === 1)?.pay_url as string | null | undefined) ?? null;
