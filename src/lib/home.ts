@@ -61,3 +61,21 @@ export function firstName(name: string | null | undefined, email: string): strin
   const local = email.split("@")[0].split("+")[0].split(/[._-]/)[0];
   return local ? local.charAt(0).toUpperCase() + local.slice(1) : email;
 }
+
+export type StageState = "done" | "current" | "upcoming";
+
+/** Which stage the client is in: the first one that is not fully done. */
+export function stageStates(tasks: HomeTask[]): Record<Stage, StageState> {
+  const groups = groupByStage(tasks);
+  let currentFound = false;
+  const out = {} as Record<Stage, StageState>;
+  for (const s of STAGES) {
+    const list = groups[s];
+    const done = list.length > 0 && list.every((x) => x.status === "done");
+    if (done) out[s] = "done";
+    else if (!currentFound) { out[s] = "current"; currentFound = true; }
+    else out[s] = "upcoming";
+  }
+  return out;
+}
+

@@ -8,6 +8,8 @@ import { LayerStack } from "@/components/layer-stack";
 import { completedStages, dayOfJourney, groupByStage, nextTask, progress, STAGES, type HomeTask, type TaskStatus } from "@/lib/home";
 import { t, tDynamic } from "@/lib/i18n";
 import { taskHref as hrefFor } from "@/lib/dashboard/sample";
+import { Art } from "@/components/illustrations/art";
+import { JourneyMap } from "./journey-map";
 import { StatCard } from "./stat-card";
 
 const STATUS_COLOR: Record<TaskStatus, "success" | "brand" | "error" | "gray"> = { done: "success", in_progress: "brand", blocked: "error", todo: "gray" };
@@ -41,6 +43,7 @@ export function ClientDashboard({ name, company, startDate, now, tasks, links, n
           <h1 className="text-display-sm font-semibold text-primary">{t("dash.welcome", "en", { name })}</h1>
           <p className="text-md text-tertiary">{t("dash.subtitle")}</p>
         </div>
+        <Art kind={next ? "welcome" : "review"} className="hidden h-24 w-auto sm:block" />
         {next && (
           <Button size="lg" href={taskHref(next.type)} iconTrailing={ArrowRight}>
             {t("dash.continue")}
@@ -54,6 +57,8 @@ export function ClientDashboard({ name, company, startDate, now, tasks, links, n
         <StatCard label={t("dash.stat.stages")} value={`${stages} / 3`} progress={{ value: stages, max: 3 }} />
         {nextPayment ? <StatCard label={t("dash.stat.payment")} value={nextPayment.amount} hint={nextPayment.due} /> : null}
       </section>
+
+      <JourneyMap tasks={tasks} />
 
       <section className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-5 rounded-xl bg-primary p-6 shadow-xs ring-1 ring-secondary">
