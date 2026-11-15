@@ -6,6 +6,7 @@ const SCREENS = [
   { href: "/demo/access", title: "Access and assets", note: "CRM connect, secure credentials, booking link, brand files" },
   { href: "/demo/review", title: "Review and approve", note: "Inline comments, version diff, LinkedIn preview, approval" },
   { href: "/demo/payments", title: "Stage payments", note: "Invoices that appear only after approval, due dates, reminders" },
+  { href: "/demo/admin", title: "Admin board", note: "Every client by stage, blocker flags on top, client detail" },
 ];
 
 export default function DemoIndex() {
