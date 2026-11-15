@@ -23,3 +23,15 @@ describe("toAdminClients", () => {
     expect([c.plan, c.stage, c.owner]).toEqual(["starter", "intake", "Unassigned"]);
   });
 });
+
+describe("toAdminClients invoices", () => {
+  it("maps invoices and the oldest unpaid date", () => {
+    const [c] = toAdminClients(ws, [], [], [], [], [
+      { workspace_id: "w1", stage: 1, amount_cents: 50000, created_at: "2026-11-01T00:00:00Z", paid_at: "2026-11-01T00:00:00Z" },
+      { workspace_id: "w1", stage: 2, amount_cents: null, created_at: "2020-01-01T00:00:00Z", paid_at: null },
+      { workspace_id: "other", stage: 2, amount_cents: 1, created_at: "2019-01-01T00:00:00Z", paid_at: null },
+    ]);
+    expect(c.invoices.map((i) => [i.stage, i.status])).toEqual([[1, "paid"], [2, "overdue"]]);
+    expect(c.invoiceUnpaidSince).toBe("2020-01-01T00:00:00Z");
+  });
+});

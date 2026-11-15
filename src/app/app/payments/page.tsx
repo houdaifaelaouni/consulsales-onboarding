@@ -1,16 +1,36 @@
+import { redirect } from "next/navigation";
+import { Clock } from "@untitledui/icons";
+import { EmptyState } from "@/components/application/empty-state/empty-state";
 import { PaymentsBoard } from "@/components/payments/payments-board";
-import { PreviewNote } from "@/components/shell/preview-note";
-import type { MonthlyPlan, StageInvoice } from "@/lib/payments-ui/types";
+import { toStageInvoices } from "@/lib/payments-ui/from-db";
+import type { MonthlyPlan } from "@/lib/payments-ui/types";
+import { t } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/server";
 
-// TODO(backend): read invoices from the payment provider through the signed-in client's workspace.
-const NOW = "2026-11-15T12:00:00Z";
-const invoices: StageInvoice[] = [
-  { stage: 1, title: "Foundation", amountCents: 0, currency: "eur", unlockedBy: "You paid at checkout", unlocks: "Your workspace and kickoff" },
-  { stage: 2, title: "Build", amountCents: 0, currency: "eur", unlockedBy: "You approve your ideal client profile", unlocks: "Profile rewrite, lead lists and message sequences" },
-  { stage: 3, title: "Launch", amountCents: 0, currency: "eur", unlockedBy: "You approve your profile and first messages", unlocks: "Go-live, content engine and weekly reports" },
-];
+export const dynamic = "force-dynamic";
+
+// The monthly price is not set yet (see src/lib/plans.ts), so it shows as a dash.
 const monthly: MonthlyPlan = { title: "Monthly plan", amountCents: 0, currency: "eur", startsWhen: "After stage 3 is paid" };
 
-export default function ClientPayments() {
-  return (<><PreviewNote /><PaymentsBoard initial={invoices} monthly={monthly} now={NOW} /></>);
+export default async function ClientPayments() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data: m } = await supabase.from("membership").select("workspace_id").eq("user_id", user.id).limit(1);
+  const workspaceId = m?.[0]?.workspace_id as string | undefined;
+  if (!workspaceId) {
+    return (
+      <main className="mx-auto flex max-w-7xl px-4 py-16 lg:px-8">
+        <EmptyState className="mx-auto">
+          <EmptyState.Header><EmptyState.FeaturedIcon icon={Clock} color="gray" /></EmptyState.Header>
+          <EmptyState.Content>
+            <EmptyState.Title>{t("dash.empty.title")}</EmptyState.Title>
+            <EmptyState.Description>{t("dash.empty.body")}</EmptyState.Description>
+          </EmptyState.Content>
+        </EmptyState>
+      </main>
+    );
+  }
+  const { data: rows } = await supabase.from("invoice").select("stage,amount_cents,currency,created_at,paid_at,pay_url,pdf_url").eq("workspace_id", workspaceId);
+  return <PaymentsBoard initial={toStageInvoices(rows ?? [])} monthly={monthly} now={new Date().toISOString()} live />;
 }

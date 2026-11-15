@@ -162,6 +162,7 @@
   "payments.overdueNote": "This invoice is overdue. Paying keeps your next stage on schedule.",
   "payments.monthly": "Monthly plan",
   "payments.monthlyBody": "Starts automatically after stage 3 is paid: {amount} per month. You can cancel any time before it starts.",
+  "payments.notReady": "Online payment is not switched on yet. We will email you the secure payment link.",
   "payments.demoPay": "Demo only: in the live app this opens the secure payment page.",
   "admin.title": "Clients",
   "admin.subtitle": "Every client by stage. Clients with blockers appear first.",

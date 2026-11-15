@@ -1,20 +1,35 @@
-import type { AdminClient, AdminEvent, AdminPlan, AdminStage, AdminTask, AdminTaskStatus } from "./types";
+import type { AdminClient, AdminEvent, AdminInvoice, AdminPlan, AdminStage, AdminTask, AdminTaskStatus } from "./types";
 
 export interface WorkspaceRow { id: string; company: string; plan: string; stage: string; start_date: string }
 export interface TaskRow { id: string; workspace_id: string; type: string; status: string; due_at: string | null }
 export interface MemberRow { workspace_id: string; user_id: string; role: string }
 export interface EventRow { workspace_id: string; actor: string | null; action: string; at: string }
+export interface InvoiceRow { workspace_id: string; stage: number; amount_cents: number | null; created_at: string; paid_at: string | null }
 export interface PersonRow { id: string; name: string | null; email: string }
 
 const PLANS: AdminPlan[] = ["starter", "pro", "enterprise"];
 const STAGES: AdminStage[] = ["intake", "building", "review", "live"];
 const STATUSES: AdminTaskStatus[] = ["todo", "in_progress", "blocked", "done"];
 
+const DAY_MS = 86_400_000;
+
+function toInvoices(rows: InvoiceRow[], now = Date.now()): AdminInvoice[] {
+  return rows.filter((r) => r.stage >= 1 && r.stage <= 3).sort((a, b) => a.stage - b.stage).map((r) => ({
+    stage: r.stage as 1 | 2 | 3, amountCents: r.amount_cents ?? 0,
+    status: r.paid_at ? "paid" : now - Date.parse(r.created_at) > 7 * DAY_MS ? "overdue" : "due",
+  }));
+}
+
+/** When the oldest unpaid invoice was created, for the admin "unpaid" flag. */
+function oldestUnpaid(rows: InvoiceRow[]): string | undefined {
+  return rows.filter((r) => !r.paid_at).map((r) => r.created_at).sort()[0];
+}
+
 const personName = (p?: PersonRow) => p?.name?.trim() || p?.email.split("@")[0] || "";
 
 /** Builds the admin board's client list from raw rows. Invoices, files and notes have no tables yet, so they stay empty. */
 export function toAdminClients(
-  workspaces: WorkspaceRow[], tasks: TaskRow[], members: MemberRow[], events: EventRow[], people: PersonRow[],
+  workspaces: WorkspaceRow[], tasks: TaskRow[], members: MemberRow[], events: EventRow[], people: PersonRow[], invoices: InvoiceRow[] = [],
 ): AdminClient[] {
   const who = new Map(people.map((p) => [p.id, p]));
   return workspaces.map((w) => {
@@ -31,7 +46,7 @@ export function toAdminClients(
       plan: PLANS.includes(w.plan as AdminPlan) ? (w.plan as AdminPlan) : "starter",
       stage: STAGES.includes(w.stage as AdminStage) ? (w.stage as AdminStage) : "intake",
       owner: lead ? personName(who.get(lead.user_id)) || "Unassigned" : "Unassigned",
-      tasks: ts, files: [], invoices: [], events: evs, notes: [],
+      tasks: ts, files: [], invoices: toInvoices(invoices.filter((i) => i.workspace_id === w.id)), invoiceUnpaidSince: oldestUnpaid(invoices.filter((i) => i.workspace_id === w.id)), events: evs, notes: [],
     };
   });
 }
