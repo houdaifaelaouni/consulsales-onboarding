@@ -25,7 +25,10 @@ type Tab = "review" | "versions" | "preview";
 const STATUS_COLOR = { draft: "gray", in_review: "brand", changes_requested: "warning", approved: "success" } as const;
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
-export function DeliverableReview({ deliverable, role = "client_owner", backHref = "/demo/review" }: { deliverable: Deliverable; role?: Role; backHref?: string }) {
+export type Decide = (decision: "approve" | "request_changes", note?: string) => Promise<boolean>;
+
+export function DeliverableReview({ deliverable, role = "client_owner", backHref = "/demo/review", onDecide }: { deliverable: Deliverable; role?: Role; backHref?: string; onDecide?: Decide }) {
+  const [decideError, setDecideError] = useState(false);
   const latest = deliverable.versions[deliverable.versions.length - 1];
   const [status, setStatus] = useState<DeliverableStatus>(deliverable.status);
   const [approved, setApproved] = useState(deliverable.approved);
@@ -157,7 +160,8 @@ export function DeliverableReview({ deliverable, role = "client_owner", backHref
               <p className="text-md text-tertiary">{t("review.approveBody", "en", { unlock: deliverable.unlocks ?? "" })}</p>
               <div className="flex justify-end gap-3">
                 <Button color="tertiary" onPress={() => setDialog(null)}>{t("review.cancel")}</Button>
-                <Button onPress={() => { setStatus("approved"); setApproved({ by: SAMPLE_CLIENT.name, at: new Date().toISOString(), versionN: version.n }); setDialog(null); }}>{t("review.confirmApprove")}</Button>
+                {decideError && <p role="alert" className="text-sm text-error-primary">{t("review.decideError")}</p>}
+                <Button onPress={async () => { setDecideError(false); if (onDecide && !(await onDecide("approve"))) { setDecideError(true); return; } setStatus("approved"); setApproved({ by: SAMPLE_CLIENT.name, at: new Date().toISOString(), versionN: version.n }); setDialog(null); }}>{t("review.confirmApprove")}</Button>
               </div>
             </div>
           </Dialog>
@@ -172,7 +176,8 @@ export function DeliverableReview({ deliverable, role = "client_owner", backHref
               <TextArea aria-label={t("review.changesTitle")} placeholder={t("review.changesPlaceholder")} value={changeNote} onChange={setChangeNote} rows={4} />
               <div className="flex justify-end gap-3">
                 <Button color="tertiary" onPress={() => setDialog(null)}>{t("review.cancel")}</Button>
-                <Button isDisabled={!changeNote.trim()} onPress={() => { setStatus("changes_requested"); setChangesSent(true); setDialog(null); }}>{t("review.sendChanges")}</Button>
+                {decideError && <p role="alert" className="text-sm text-error-primary">{t("review.decideError")}</p>}
+                <Button isDisabled={!changeNote.trim()} onPress={async () => { setDecideError(false); if (onDecide && !(await onDecide("request_changes", changeNote.trim()))) { setDecideError(true); return; } setStatus("changes_requested"); setChangesSent(true); setDialog(null); }}>{t("review.sendChanges")}</Button>
               </div>
             </div>
           </Dialog>
