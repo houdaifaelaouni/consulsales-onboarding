@@ -21,8 +21,13 @@ export async function POST(request: Request) {
     const { data: userId, error } = await admin.rpc("pin_verify", { p_email: email, p_pin: pin });
     if (error || !userId) return FAIL();
 
+    // Sign in the account the PIN belongs to, using that account's own email, never the one typed in the request.
+    const { data: account, error: accountErr } = await admin.auth.admin.getUserById(userId as string);
+    const accountEmail = account?.user?.email;
+    if (accountErr || !accountEmail || !account?.user?.email_confirmed_at) return FAIL();
+
     // Start a normal session without sending an email: make a one-time link on the server and redeem it at once.
-    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "magiclink", email: accountEmail });
     const hash = link?.properties?.hashed_token;
     if (linkErr || !hash) return FAIL();
     const supabase = await createClient();
