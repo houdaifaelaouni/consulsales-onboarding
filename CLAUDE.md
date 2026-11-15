@@ -11,8 +11,10 @@ Read `docs/CODEMAP.md` before searching the code. It lists where each feature li
 - 6 modules: Welcome & kickoff, Guided intake, Access & assets, Review & approve, Stage payments,
   Live dashboard (v2 only). Plus admin board and notifications.
 - Roles: `client_owner`, `delivery_lead` (sees assigned clients only), `admin`. (`client_member` is v2.)
-- Core promise: "you never pay ahead of the work". Stage 1 paid at checkout; stage 2/3 invoices are
-  created only when the matching deliverable is approved.
+- Payment rule (founder decision, Nov 2026): no payment, no work. Stage 1 (€300) is paid before the client can enter
+  the workspace; stage 2 is billed and charged when the ICP is approved, stage 3 when the LinkedIn profile is approved;
+  the database refuses to send a deliverable until its stage is paid. Admins can set custom stage prices, make a stage
+  free (waive) or give a free trial (entry only) from the client page; every change is logged.
 - v1 scope rule: if a story is not needed to onboard the 3 pilot clients, it moves to v2.
 - Never automate LinkedIn actions; never store LinkedIn passwords.
 

@@ -1,4 +1,4 @@
-import { PLANS, type PlanKey } from "@/lib/plans";
+import { PLANS, stagePrice, type PlanKey, type StageOverrides } from "@/lib/plans";
 import type { PaymentProvider } from "./types";
 
 export const MAX_CHARGE_ATTEMPTS = 3;
@@ -10,7 +10,7 @@ export interface DueInvoice { stage: 2 | 3; attempts: number; attemptedAt: strin
 /** What the charge engine needs from storage, so the rules can be tested without a database. */
 export interface ChargeRepo {
   /** The plan and the saved card ids, or null when the workspace has no saved card. */
-  loadAccount(workspaceId: string): Promise<{ plan: PlanKey; memberId: string; paymentMethodId: string } | null>;
+  loadAccount(workspaceId: string): Promise<{ plan: PlanKey; overrides?: StageOverrides; memberId: string; paymentMethodId: string } | null>;
   /** Unpaid stage 2 and 3 invoices of the workspace. */
   listUnpaid(workspaceId: string): Promise<DueInvoice[]>;
   /**
@@ -45,7 +45,7 @@ export async function chargeDueInvoices(deps: { repo: ChargeRepo; provider: Paym
 
   for (const inv of await repo.listUnpaid(workspaceId)) {
     if (!isDue(inv, now)) { out.push({ stage: inv.stage, result: "skipped" }); continue; }
-    const amount = cfg.stagePrices[inv.stage - 1];
+    const amount = stagePrice(account.plan, inv.stage, account.overrides);
     const retryBefore = new Date(now.getTime() - RETRY_AFTER_HOURS * 3_600_000).toISOString();
     if (!(await repo.claim(workspaceId, inv.stage, Math.round(amount * 100), cfg.currency, retryBefore))) { out.push({ stage: inv.stage, result: "skipped" }); continue; }
     try {

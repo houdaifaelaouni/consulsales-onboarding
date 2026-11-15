@@ -44,3 +44,12 @@ export const PLANS: Record<PlanKey, PlanConfig> = {
 export function isPlanKey(v: unknown): v is PlanKey {
   return v === "starter" || v === "pro" || v === "enterprise";
 }
+
+/** Custom stage prices set by an admin, in cents (null = the plan price). Stored on the workspace. */
+export type StageOverrides = ReadonlyArray<number | null> | null | undefined;
+
+/** What a stage costs this client, in euros: the admin's custom price if set, else the plan price. */
+export function stagePrice(plan: PlanKey, stage: number, overrides?: StageOverrides): number {
+  const custom = overrides?.[stage - 1];
+  return typeof custom === "number" && custom > 0 ? custom / 100 : PLANS[plan].stagePrices[stage - 1];
+}

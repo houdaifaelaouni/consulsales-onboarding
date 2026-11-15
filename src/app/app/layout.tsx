@@ -7,9 +7,9 @@ import { getViewer } from "@/lib/auth/viewer";
 import { firstName } from "@/lib/home";
 import { APP_NAV } from "@/lib/nav";
 import { getPaymentProvider } from "@/lib/payments";
-import { hasPaidEntry } from "@/lib/payments/entry";
+import { mayEnter } from "@/lib/payments/entry";
 import { ensureEntryInvoice, ensureStageLinks } from "@/lib/payments/stage-links";
-import { isPlanKey, PLANS, type PlanKey } from "@/lib/plans";
+import { isPlanKey, PLANS, stagePrice, type PlanKey } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,18 +25,21 @@ export default async function ClientLayout({ children }: { children: React.React
   const { data: m } = await supabase.from("membership").select("workspace_id").eq("user_id", viewer.id).eq("role", "client_owner").limit(1);
   const workspaceId = m?.[0]?.workspace_id as string | undefined;
   if (workspaceId && !isStaff(viewer)) {
-    const { data: inv } = await supabase.from("invoice").select("stage,paid_at,pay_url,provider_invoice_id").eq("workspace_id", workspaceId);
-    if (!hasPaidEntry(inv)) {
+    const [{ data: inv }, { data: ws }] = await Promise.all([
+      supabase.from("invoice").select("stage,paid_at,pay_url,provider_invoice_id").eq("workspace_id", workspaceId),
+      supabase.from("workspace").select("plan,company,stage_price_cents,trial_until").eq("id", workspaceId).single(),
+    ]);
+    if (!mayEnter(inv, (ws?.trial_until as string | null | undefined) ?? null, new Date())) {
       const entry = inv?.find((r) => r.stage === 1);
       let payUrl = (entry?.pay_url as string | null | undefined) ?? null;
       let checkoutId = (entry?.provider_invoice_id as string | null | undefined) ?? null;
-      const { data: ws } = await supabase.from("workspace").select("plan,company").eq("id", workspaceId).single();
       const plan: PlanKey = isPlanKey(ws?.plan) ? ws.plan : "starter";
+      const overrides = (ws?.stage_price_cents as Array<number | null> | null | undefined) ?? null;
       if (!payUrl) {
         try {
           const db = createAdminClient();
           await ensureEntryInvoice(db, workspaceId);
-          await ensureStageLinks({ db, provider: getPaymentProvider(), workspaceId, plan, appUrl: appUrl() });
+          await ensureStageLinks({ db, provider: getPaymentProvider(), workspaceId, plan, overrides, appUrl: appUrl() });
           const { data: again } = await supabase.from("invoice").select("pay_url,provider_invoice_id").eq("workspace_id", workspaceId).eq("stage", 1).maybeSingle();
           payUrl = (again?.pay_url as string | null | undefined) ?? null;
           checkoutId = (again?.provider_invoice_id as string | null | undefined) ?? null;
@@ -45,7 +48,7 @@ export default async function ClientLayout({ children }: { children: React.React
       const cfg = PLANS[plan];
       return (
         <PayToEnter
-          amount={`€${cfg.stagePrices[0]}`} nextAmount={`€${cfg.stagePrices[1]}`} planTitle={cfg.title}
+          amount={`€${stagePrice(plan, 1, overrides)}`} nextAmount={`€${stagePrice(plan, 2, overrides)}`} planTitle={cfg.title}
           holder={viewer.name || firstName(viewer.name, viewer.email)} company={(ws?.company as string | undefined) ?? ""} email={viewer.email}
           checkoutId={checkoutId} payUrl={payUrl}
         />
