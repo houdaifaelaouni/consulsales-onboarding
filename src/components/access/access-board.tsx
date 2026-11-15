@@ -15,10 +15,13 @@ import { cx } from "@/utils/cx";
 interface PickedFile { id: string; name: string; size: number; type: string; url: string | null }
 const STATUS_COLOR = { connected: "success", pending: "gray", blocked: "error" } as const;
 
-export function AccessBoard({ initial }: { initial: AccessStates }) {
+export function AccessBoard({ initial, onChange }: { initial: AccessStates; onChange?: (id: string, state: NonNullable<AccessStates[string]>) => void }) {
   const [states, setStates] = useState<AccessStates>(initial);
   const { done, total } = connectedCount(states, ACCESS_ITEMS.map((i) => i.id));
-  const set = (id: string, patch: AccessStates[string]) => setStates((s) => ({ ...s, [id]: patch }));
+  const set = (id: string, patch: AccessStates[string]) => {
+    setStates((s) => ({ ...s, [id]: patch }));
+    if (patch) onChange?.(id, patch);
+  };
 
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8 lg:px-8">
