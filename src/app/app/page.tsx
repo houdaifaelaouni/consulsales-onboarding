@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import { SecureCard } from "@/components/auth/secure-card";
 import { Notice } from "@/components/shell/notice";
 import { ClientDashboard } from "@/components/dashboard/client-dashboard";
+import { pinStatus } from "@/lib/auth/pin-status";
+import { getViewer } from "@/lib/auth/viewer";
 import { firstName, type HomeTask, type TaskStatus } from "@/lib/home";
 import { t, type Locale } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
@@ -52,11 +55,17 @@ export default async function ClientHome() {
   const name = firstName(data.name, data.email);
   if (!workspace) return <Notice icon="waiting" title={t("dash.empty.title")} body={t("dash.empty.body")} />;
 
+  const viewer = await getViewer();
+  const pin = viewer ? await pinStatus(viewer.id) : "unavailable";
+
   return (
-    <ClientDashboard
-      name={name} company={workspace.company} startDate={workspace.start_date} now={new Date()} tasks={tasks}
-      links="app"
-    />
+    <>
+      {viewer && <SecureCard userId={viewer.id} pin={pin} />}
+      <ClientDashboard
+        name={name} company={workspace.company} startDate={workspace.start_date} now={new Date()} tasks={tasks}
+        links="app"
+      />
+    </>
   );
 }
 
