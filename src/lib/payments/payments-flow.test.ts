@@ -70,13 +70,13 @@ describe("handlePayment", () => {
   });
   it("refuses a first payment below the stage 1 price, without creating anything", async () => {
     const provision = vi.fn();
-    const r = await handlePayment({ env, stageRepo, provision }, pay({ planId: "plan_p", amount: "300" })); // Growth stage 1 is 600
+    const r = await handlePayment({ env, stageRepo, provision }, pay({ planId: "plan_p", amount: "299.99" })); // below the 300 every plan pays at checkout
     expect(r.status).toBe(422);
     expect(provision).not.toHaveBeenCalled();
   });
   it("creates the workspace for the plan that was bought", async () => {
     const provision = vi.fn().mockResolvedValue({ status: "created" });
-    const r = await handlePayment({ env, stageRepo, provision }, pay({ planId: "plan_p", amount: "600" }));
+    const r = await handlePayment({ env, stageRepo, provision }, pay({ planId: "plan_p", amount: "300" }));
     expect(r).toEqual({ status: 200, body: { ok: true, result: "created" } });
     expect(provision.mock.calls[0][0].metadata.plan).toBe("pro");
   });

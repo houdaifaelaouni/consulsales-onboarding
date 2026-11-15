@@ -8,6 +8,9 @@ export interface NormalizedPayment {
   currency: string;
   /** The Whop plan the buyer picked (variant_id, `plan_...`). Used to know which of our plans was bought. */
   planId?: string;
+  /** Whop's ids for the buyer and the card they paid with, kept so later stages can be charged automatically. */
+  memberId?: string;
+  paymentMethodId?: string;
   metadata: Record<string, string>;
 }
 

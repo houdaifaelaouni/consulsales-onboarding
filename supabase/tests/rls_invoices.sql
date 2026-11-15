@@ -29,22 +29,21 @@ begin
 
   set local role authenticated;
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000d5","role":"authenticated"}',true);
-  perform public.deliverable_submit('51000000-0000-0000-0000-000000000001');
-  perform public.deliverable_submit('51000000-0000-0000-0000-000000000002');
-  perform public.deliverable_submit('51000000-0000-0000-0000-000000000003');
+  perform public.deliverable_submit('51000000-0000-0000-0000-000000000001'); -- ICP
+  select count(*) into n from public.invoice where stage > 1; assert n = 0, 'sending the ICP bills nothing';
+  perform public.deliverable_submit('51000000-0000-0000-0000-000000000003'); -- DM sequences first
+  select count(*) into n from public.invoice where stage > 1; assert n = 0, 'DM sequences before the profile bill nothing (never out of order)';
+  perform public.deliverable_submit('51000000-0000-0000-0000-000000000002'); -- profile
+  select count(*) into n from public.invoice where stage = 2 and paid_at is null; assert n = 1, 'sending the profile creates the stage 2 invoice';
+  select count(*) into n from public.invoice where stage = 3 and paid_at is null; assert n = 1, 'and stage 3 too, since the DM sequences were already sent';
+  select count(*) into n from public.event_log where action = 'invoice.unlocked'; assert n = 2, 'each unlock is logged once';
+  select count(*) into n from public.deliverable where workspace_id = '50000000-0000-0000-0000-00000000000a' and status = 'in_review'; assert n = 3, 'all three were sent';
 
+  -- The client approving the ICP changes nothing about billing.
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000a5","role":"authenticated"}',true);
-  select count(*) into n from public.invoice where stage > 1; assert n = 0, 'nothing billed ahead of the work';
-
   perform public.deliverable_decide('51000000-0000-0000-0000-000000000001','approve',null,1);
-  select count(*) into n from public.invoice where stage = 2 and paid_at is null; assert n = 1, 'ICP approval creates the stage 2 invoice';
-  select count(*) into n from public.invoice where stage = 3; assert n = 0, 'stage 3 still locked';
-
-  perform public.deliverable_decide('51000000-0000-0000-0000-000000000002','approve',null,1);
-  select count(*) into n from public.invoice where stage = 3; assert n = 0, 'profile alone does not unlock stage 3';
-  perform public.deliverable_decide('51000000-0000-0000-0000-000000000003','approve',null,1);
-  select count(*) into n from public.invoice where stage = 3 and paid_at is null; assert n = 1, 'profile plus messages unlock stage 3';
-  select count(*) into n from public.event_log where action = 'invoice.unlocked'; assert n = 2, 'unlocks are logged once each';
+  select count(*) into n from public.invoice where stage > 1; assert n = 2, 'approving does not create or remove invoices';
+  select count(*) into n from public.event_log where action = 'invoice.unlocked'; assert n = 2, 'no extra unlock entries';
 
   -- Clients cannot create, edit or delete invoices.
   ok := false;

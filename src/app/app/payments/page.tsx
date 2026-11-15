@@ -30,7 +30,7 @@ export default async function ClientPayments({ searchParams }: { searchParams: P
   try { await ensureStageLinks({ db: createAdminClient(), provider: getPaymentProvider(), workspaceId, plan, appUrl: appUrl() }); } catch { /* not switched on yet */ }
 
   const { data: rows } = await supabase.from("invoice").select("stage,amount_cents,currency,created_at,paid_at,pay_url,pdf_url").eq("workspace_id", workspaceId);
-  const monthly: MonthlyPlan = { title: "Monthly plan", amountCents: PLANS[plan].monthlyPrice * 100, currency: "eur", startsWhen: "After stage 3 is paid" };
+  const monthly: MonthlyPlan = { title: "Monthly plan", amountCents: PLANS[plan].monthlyPrice * 100, currency: "eur", startsWhen: "From day 30" };
   const invoices = toStageInvoices(rows ?? [], plan);
   const confirming = !!paid && invoices.some((i) => String(i.stage) === paid && !i.paidAt);
   return <PaymentsBoard initial={invoices} monthly={monthly} now={new Date().toISOString()} live confirming={confirming} />;
