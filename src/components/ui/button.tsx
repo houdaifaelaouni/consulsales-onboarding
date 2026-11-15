@@ -8,16 +8,16 @@ const variants: Record<Variant, string> = {
   ghost: "bg-transparent text-ink hover:bg-surface-1",
 };
 
+/** Class names for anything that should look like a button (e.g. a Next.js Link). */
+export function buttonStyles(variant: Variant = "primary", className?: string): string {
+  return cn(
+    "inline-flex min-h-10 items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+    variants[variant], className,
+  );
+}
+
 export function Button({
   variant = "primary", className, ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return (
-    <button
-      className={cn(
-        "inline-flex min-h-10 items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        variants[variant], className,
-      )}
-      {...props}
-    />
-  );
+  return <button className={buttonStyles(variant, className)} {...props} />;
 }
