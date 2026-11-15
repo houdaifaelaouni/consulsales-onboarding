@@ -1,0 +1,21 @@
+import type { IntakeStore } from "@/components/intake/intake-form";
+import { createClient } from "@/lib/supabase/client";
+import { answersToRows, rowsToAnswers } from "./rows";
+
+/** Saves intake answers to the database. Row-level security lets only the client owner write them. */
+export function supabaseIntakeStore(workspaceId: string): IntakeStore {
+  const supabase = createClient();
+  return {
+    async load() {
+      const { data, error } = await supabase.from("intake_answer").select("question_key,value").eq("workspace_id", workspaceId);
+      if (error) throw new Error("load failed");
+      return rowsToAnswers(data ?? []);
+    },
+    async save(answers) {
+      const rows = answersToRows(answers).map((r) => ({ ...r, workspace_id: workspaceId }));
+      if (rows.length === 0) return;
+      const { error } = await supabase.from("intake_answer").upsert(rows, { onConflict: "workspace_id,question_key" });
+      if (error) throw new Error("save failed");
+    },
+  };
+}
