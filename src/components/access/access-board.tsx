@@ -59,7 +59,7 @@ function ItemCard({ item, state, onChange }: { item: AccessItem; state: AccessSt
 
       {status === "blocked" && (
         <div className="space-y-2 border-l-2 border-ink pl-3 text-sm" role="status">
-          {state?.blockedSince && <p className="text-ink">{t("access.blockedSince", "en", { when: new Date(state.blockedSince).toLocaleDateString("en-GB") })}</p>}
+          {state?.blockedSince && <p className="text-ink">{t("access.blockedSince", "en", { when: new Date(state.blockedSince).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) })}</p>}
           <p className="text-ink-muted">{t("access.blockedHelp", "en", { text: item.blockedHelp })}</p>
           {flagged && <p className="text-ink">{t("access.flagged")}</p>}
           <Button variant="secondary" onClick={() => onChange({ status: "pending" })}>{t("access.tryAgain")}</Button>
