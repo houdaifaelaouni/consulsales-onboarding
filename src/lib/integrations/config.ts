@@ -65,6 +65,7 @@ export const INTEGRATIONS: Integration[] = [
     id: "booking", title: "Kickoff booking", purpose: "Where kickoff and review calls are booked.", getItFrom: "Your booking tool (Cal.com or your current one).",
     unlocks: "Real kickoff slots instead of sample ones.",
     vars: [
+      { name: "NEXT_PUBLIC_BAZOOKA_BOOKING_LINK", kind: "public", required: false, purpose: "Which Bazooka event the kickoff page shows. Falls back to the built-in link.", example: "account-id/event-name" },
       { name: "BOOKING_PROVIDER", kind: "config", required: false, purpose: "calcom, calendly or custom.", example: "calcom" },
       { name: "BOOKING_API_KEY", kind: "secret", required: false, purpose: "API key for the booking tool.", example: "cal_live_…" },
       { name: "BOOKING_FALLBACK_URL", kind: "config", required: false, purpose: "Page shown if the booking tool is down.", example: "https://cal.com/consulsales/kickoff" },
