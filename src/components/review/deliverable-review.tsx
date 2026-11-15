@@ -133,7 +133,7 @@ export function DeliverableReview({ deliverable, role = "client_owner" }: { deli
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-canvas/95 px-4 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-canvas/95 px-4 py-3 backdrop-blur lg:left-[280px]">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           {status === "approved" && approved ? (
             <p className="text-sm text-ink-muted" role="status">{t("review.approvedBy", "en", { name: approved.by, date: fmt(approved.at) })}</p>
