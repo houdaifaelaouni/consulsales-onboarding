@@ -26,7 +26,7 @@ swappable. Verify Whop webhook signatures and make handlers idempotent.
 - canvas `#010102`; surfaces `#0f1011` / `#141516` / `#18191a`
 - hairline `#23252a`, hairline-strong `#34343a`
 - ink `#f7f8f8`, ink-muted `#d0d6e0`, ink-subtle `#8a8f98`
-- accent/primary `#5e6ad2` (hover `#828fff`), success `#27a644`
+- accent/primary `#5e6ad2` (hover `#828fff`), success `#27a644`, danger `#e5484d` (semantic only: admin blocker flags, never decorative)
 - Font Inter; radius 6/8/12/16px, pills for badges; 4px spacing base; **no shadows**
 - Accent only on primary CTA, focus ring, active state
 - Type: display-lg 56/600/-1.8px, headline 28/600/-0.6px, card-title 22/500/-0.4px, body 16/400,

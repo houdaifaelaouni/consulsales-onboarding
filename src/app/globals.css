@@ -16,6 +16,8 @@
   --primary-hover: #828fff;
   --primary-focus: #5e69d1;
   --success: #27a644;
+  /* Semantic only: blocker flags (FR-29). Never decorative. */
+  --danger: #e5484d;
 }
 
 @theme inline {
@@ -33,6 +35,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-focus: var(--primary-focus);
   --color-success: var(--success);
+  --color-danger: var(--danger);
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
