@@ -193,5 +193,22 @@
   "admin.detail.addNote": "Add note",
   "admin.detail.owner": "Owner: {name}",
   "admin.detail.invoiceStage": "Stage {n}",
-  "admin.detail.eventsHint": "Read-only. Every approval, payment and secret reveal is kept for 2 years."
+  "admin.detail.eventsHint": "Read-only. Every approval, payment and secret reveal is kept for 2 years.",
+  "booking.title": "Book your kickoff call",
+  "booking.subtitle": "{min} minutes with your delivery lead. We will review your intake and plan your first two weeks together.",
+  "booking.tz": "Times shown in {tz}",
+  "booking.day": "Choose a day",
+  "booking.time": "Choose a time",
+  "booking.selected": "Your call: {when}",
+  "booking.confirm": "Confirm booking",
+  "booking.confirming": "Booking…",
+  "booking.error": "We could not book that time. It may have just been taken. Pick another time or try again.",
+  "booking.empty.title": "No times available this week",
+  "booking.empty.body": "Message your delivery lead and we will find a time that works for you.",
+  "booking.fallback": "Use our booking page instead",
+  "booking.done.title": "Kickoff booked",
+  "booking.done.body": "{when}. It is ticked off on your checklist.",
+  "booking.ics": "Add to calendar",
+  "booking.reschedule": "Choose another time",
+  "booking.loading": "Loading available times"
 }

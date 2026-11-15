@@ -7,6 +7,7 @@ const SCREENS = [
   { href: "/demo/review", title: "Review and approve", note: "Inline comments, version diff, LinkedIn preview, approval" },
   { href: "/demo/payments", title: "Stage payments", note: "Invoices that appear only after approval, due dates, reminders" },
   { href: "/demo/admin", title: "Admin board", note: "Every client by stage, blocker flags on top, client detail" },
+  { href: "/demo/booking", title: "Kickoff booking", note: "Plan-specific call length, local time zone, calendar file" },
 ];
 
 export default function DemoIndex() {
