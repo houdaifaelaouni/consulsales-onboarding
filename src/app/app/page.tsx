@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
-import { AlertCircle, Clock } from "@untitledui/icons";
-import { EmptyState } from "@/components/application/empty-state/empty-state";
-import { Button } from "@/components/base/buttons/button";
+import { Notice } from "@/components/shell/notice";
 import { ClientDashboard } from "@/components/dashboard/client-dashboard";
 import { firstName, type HomeTask, type TaskStatus } from "@/lib/home";
 import { t, type Locale } from "@/lib/i18n";
@@ -45,16 +43,14 @@ export default async function ClientHome() {
     data = await loadHome();
   } catch {
     return (
-      <Notice icon="alert" title={t("dash.error.title")} body={t("dash.error.body")}>
-        <Button color="secondary" href="/app">{t("dash.error.retry")}</Button>
-      </Notice>
+      <Notice icon="error" title={t("dash.error.title")} body={t("dash.error.body")} retryHref="/app" retryLabel={t("dash.error.retry")} />
     );
   }
   if (!data) redirect("/login");
 
   const { workspace, tasks } = data;
   const name = firstName(data.name, data.email);
-  if (!workspace) return <Notice icon="clock" title={t("dash.empty.title")} body={t("dash.empty.body")} />;
+  if (!workspace) return <Notice icon="waiting" title={t("dash.empty.title")} body={t("dash.empty.body")} />;
 
   return (
     <ClientDashboard
@@ -64,19 +60,3 @@ export default async function ClientHome() {
   );
 }
 
-function Notice({ title, body, icon, children }: { title: string; body: string; icon: "alert" | "clock"; children?: React.ReactNode }) {
-  return (
-    <main className="mx-auto flex max-w-7xl px-4 py-16 lg:px-8">
-      <EmptyState className="mx-auto">
-        <EmptyState.Header>
-          <EmptyState.FeaturedIcon icon={icon === "alert" ? AlertCircle : Clock} color={icon === "alert" ? "error" : "gray"} />
-        </EmptyState.Header>
-        <EmptyState.Content>
-          <EmptyState.Title>{title}</EmptyState.Title>
-          <EmptyState.Description>{body}</EmptyState.Description>
-        </EmptyState.Content>
-        {children && <EmptyState.Footer>{children}</EmptyState.Footer>}
-      </EmptyState>
-    </main>
-  );
-}
