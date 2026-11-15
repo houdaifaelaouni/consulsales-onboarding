@@ -3,10 +3,11 @@ import { toDeliverables } from "./from-db";
 import type { Deliverable } from "./types";
 
 /** Loads deliverables through the viewer's session; RLS limits them to their own workspace. */
-export async function loadDeliverables(onlyId?: string): Promise<Deliverable[]> {
+export async function loadDeliverables(onlyId?: string, workspaceId?: string): Promise<Deliverable[]> {
   const supabase = await createClient();
   let q = supabase.from("deliverable").select("id,kind,title,status,unlocks,approved_by,approved_at,approved_version").order("created_at");
   if (onlyId) q = q.eq("id", onlyId);
+  if (workspaceId) q = q.eq("workspace_id", workspaceId);
   const { data: rows, error } = await q;
   if (error) throw new Error("load failed");
   const ids = (rows ?? []).map((r) => r.id);
