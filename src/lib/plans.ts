@@ -6,9 +6,16 @@ export interface TaskTemplate { type: string; dueInDays: number }
 export interface PlanConfig {
   key: PlanKey;
   title: string;
-  /** Stage-1 setup fee in major units. null = not configured yet (checkout refuses). */
-  stage1Price: number | null;
+  /**
+   * The three setup payments in euros, paid as the work is approved (website: "Setup, paid in 3 stages").
+   * ASSUMPTION to confirm: equal thirds of the setup price (900 / 1,800 / 4,500).
+   */
+  stagePrices: [number, number, number];
+  /** Monthly fee in euros, starts after stage 3 (website prices, excluding VAT). */
+  monthlyPrice: number;
   currency: "eur";
+  /** Name of the setting holding the Whop plan id the buyer picks at checkout. */
+  whopPlanEnv: string;
   tasks: TaskTemplate[];
 }
 
@@ -22,10 +29,13 @@ const baseTasks: TaskTemplate[] = [
 ];
 
 export const PLANS: Record<PlanKey, PlanConfig> = {
-  starter: { key: "starter", title: "Starter", stage1Price: null, currency: "eur", tasks: baseTasks },
-  pro: { key: "pro", title: "Pro", stage1Price: null, currency: "eur", tasks: [...baseTasks, { type: "approve_profile", dueInDays: 13 }] },
+  starter: { key: "starter", title: "Starter", stagePrices: [300, 300, 300], monthlyPrice: 750, currency: "eur", whopPlanEnv: "WHOP_PLAN_STARTER", tasks: baseTasks },
+  pro: {
+    key: "pro", title: "Growth", stagePrices: [600, 600, 600], monthlyPrice: 1200, currency: "eur", whopPlanEnv: "WHOP_PLAN_PRO",
+    tasks: [...baseTasks, { type: "approve_profile", dueInDays: 13 }],
+  },
   enterprise: {
-    key: "enterprise", title: "Enterprise", stage1Price: null, currency: "eur",
+    key: "enterprise", title: "Scale", stagePrices: [1500, 1500, 1500], monthlyPrice: 3500, currency: "eur", whopPlanEnv: "WHOP_PLAN_ENTERPRISE",
     tasks: [...baseTasks, { type: "approve_profile", dueInDays: 13 }, { type: "approve_sequences", dueInDays: 13 }],
   },
 };

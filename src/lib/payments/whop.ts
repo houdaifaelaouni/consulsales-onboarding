@@ -59,6 +59,7 @@ export function createWhopProvider(cfg: WhopConfig = {}): PaymentProvider {
           email: p.customer_email.toLowerCase(),
           amount: p.total?.amount ?? p.amount_charged?.amount ?? "0",
           currency: p.total?.currency ?? p.currency ?? "eur",
+          planId: p.variant_id ?? undefined,
           metadata: Object.fromEntries(
             Object.entries(p.metadata ?? {}).map(([k, v]) => [k, String(v)]),
           ),
@@ -77,6 +78,7 @@ interface WhopEnvelope {
     status?: string;
     currency?: string;
     customer_email: string | null;
+    variant_id?: string | null;
     total?: WhopMoney | null;
     amount_charged?: WhopMoney | null;
     metadata?: Record<string, unknown> | null;

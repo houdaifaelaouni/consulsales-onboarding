@@ -27,10 +27,10 @@ describe("integration state", () => {
   it("is missing, partial or ready depending on the required variables", () => {
     expect(integrationState(whop, envStatus({})).state).toBe("missing");
     expect(integrationState(whop, envStatus({ WHOP_API_KEY: "k" })).state).toBe("partial");
-    expect(integrationState(whop, envStatus({ WHOP_API_KEY: "k", WHOP_ACCOUNT_ID: "biz_1", WHOP_WEBHOOK_SECRET: "ws_1" })).state).toBe("ready");
+    expect(integrationState(whop, envStatus({ WHOP_API_KEY: "k", WHOP_ACCOUNT_ID: "biz_1", WHOP_WEBHOOK_SECRET: "ws_1", WHOP_PLAN_STARTER: "plan_s", WHOP_PLAN_PRO: "plan_p", WHOP_PLAN_ENTERPRISE: "plan_e" })).state).toBe("ready");
   });
   it("lists exactly what is missing", () => {
-    expect(integrationState(whop, envStatus({ WHOP_API_KEY: "k" })).missing).toEqual(["WHOP_ACCOUNT_ID", "WHOP_WEBHOOK_SECRET"]);
+    expect(integrationState(whop, envStatus({ WHOP_API_KEY: "k" })).missing).toEqual(["WHOP_ACCOUNT_ID", "WHOP_PLAN_STARTER", "WHOP_PLAN_PRO", "WHOP_PLAN_ENTERPRISE", "WHOP_WEBHOOK_SECRET"]);
   });
   it("treats an all-optional integration as optional until something is set", () => {
     expect(integrationState(hubspot, envStatus({})).state).toBe("optional");

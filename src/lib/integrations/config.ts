@@ -52,6 +52,9 @@ export const INTEGRATIONS: Integration[] = [
     vars: [
       { name: "WHOP_API_KEY", kind: "secret", required: true, purpose: "Creates checkouts and invoices.", example: "apik_…" },
       { name: "WHOP_ACCOUNT_ID", kind: "config", required: true, purpose: "Your Whop business ID.", example: "biz_…" },
+      { name: "WHOP_PLAN_STARTER", kind: "config", required: true, purpose: "The Whop plan id for Starter's stage-1 price (starts with plan_).", example: "plan_…" },
+      { name: "WHOP_PLAN_PRO", kind: "config", required: true, purpose: "The Whop plan id for Growth's stage-1 price.", example: "plan_…" },
+      { name: "WHOP_PLAN_ENTERPRISE", kind: "config", required: true, purpose: "The Whop plan id for Scale's stage-1 price.", example: "plan_…" },
       { name: "WHOP_WEBHOOK_SECRET", kind: "secret", required: true, purpose: "Verifies that payment events really come from Whop.", example: "ws_…" },
     ],
   },
