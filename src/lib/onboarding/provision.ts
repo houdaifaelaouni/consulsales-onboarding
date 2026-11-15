@@ -14,7 +14,7 @@ export interface ProvisionRepo {
   }): Promise<string>;
   addMembership(workspaceId: string, userId: string, role: "client_owner"): Promise<void>;
   addTasks(workspaceId: string, userId: string, tasks: Array<TaskTemplate & { dueAt: string }>): Promise<void>;
-  sendInvite(email: string, locale: string): Promise<void>;
+  sendInvite(email: string, locale: string, idempotencyKey: string): Promise<void>;
 }
 
 const LOCALES = ["en", "fr", "es", "de", "pt-br", "zh"];
@@ -46,7 +46,7 @@ export async function provisionWorkspace(
     workspaceId, userId,
     PLANS[plan].tasks.map((t) => ({ ...t, dueAt: new Date(now.getTime() + t.dueInDays * 86_400_000).toISOString() })),
   );
-  await repo.sendInvite(p.email, locale);
+  await repo.sendInvite(p.email, locale, `invite-${provider}-${p.paymentId}`);
   await repo.recordEvent(p.eventId, provider, "payment.succeeded");
   return { status: "created", workspaceId };
 }

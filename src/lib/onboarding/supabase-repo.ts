@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { sendInviteEmail } from "@/lib/email/send";
+import type { Locale } from "@/lib/i18n";
 import type { ProvisionRepo } from "./provision";
 
 /** Server-only. Uses the service role, which bypasses RLS: never import from client code. */
@@ -46,12 +48,14 @@ export function createSupabaseProvisionRepo(): ProvisionRepo {
       );
       if (error) throw error;
     },
-    async sendInvite(email) {
-      // Magic-link email for now; localised React Email via Resend replaces this next.
-      const { error } = await db.auth.signInWithOtp({
-        email, options: { emailRedirectTo: `${appUrl}/auth/callback`, shouldCreateUser: false },
+    async sendInvite(email, locale, idempotencyKey) {
+      // Generate the magic link server-side and send it through Resend, so we are not limited by
+      // Supabase's built-in email rate limit and can localise the message.
+      const { data, error } = await db.auth.admin.generateLink({
+        type: "magiclink", email, options: { redirectTo: `${appUrl}/auth/callback` },
       });
-      if (error) throw error;
+      if (error || !data.properties?.action_link) throw error ?? new Error("generateLink failed");
+      await sendInviteEmail({ to: email, locale: locale as Locale, url: data.properties.action_link, idempotencyKey });
     },
   };
 }

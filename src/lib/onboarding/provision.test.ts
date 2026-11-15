@@ -19,7 +19,7 @@ function memoryRepo(failOn?: "createWorkspace") {
     },
     async addMembership(_w, _u, role) { state.memberships.push(role); },
     async addTasks(_w, _u, t) { state.tasks.push(...t.map((x) => x.type)); },
-    async sendInvite(email, locale) { state.invites.push(`${email}:${locale}`); },
+    async sendInvite(email, locale, key) { state.invites.push(`${email}:${locale}:${key}`); },
   };
   return { repo, state };
 }
@@ -37,7 +37,7 @@ describe("provisionWorkspace", () => {
     expect(state.workspaces[0]).toMatchObject({ plan: "pro", language: "fr", company: "Studio North" });
     expect(state.memberships).toEqual(["client_owner"]);
     expect(state.tasks).toContain("approve_profile");
-    expect(state.invites).toEqual(["sara@agency.com:fr"]);
+    expect(state.invites).toEqual(["sara@agency.com:fr:invite-whop-pay_1"]);
     expect(state.events).toEqual(["msg_1"]);
   });
 
