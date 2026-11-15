@@ -1,20 +1,28 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Badge, Button, Card, Dialog, Select, Textarea } from "@/components/ui";
-import { cn } from "@/lib/cn";
+import { ArrowLeft, CheckCircle, Lock01 } from "@untitledui/icons";
+import { Heading as AriaHeading } from "react-aria-components";
+import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal";
+import { Tabs } from "@/components/application/tabs/tabs";
+import { Badge } from "@/components/base/badges/badges";
+import { Button } from "@/components/base/buttons/button";
+import { Input } from "@/components/base/input/input";
+import { Select } from "@/components/base/select/select";
+import { TextArea } from "@/components/base/textarea/textarea";
 import { t } from "@/lib/i18n";
 import { reanchor } from "@/lib/review/comments";
+import { versionText } from "@/lib/review/preview";
 import { SAMPLE_CLIENT } from "@/lib/review/sample";
 import { canApprove, canComment, isLocked } from "@/lib/review/status";
-import { versionText } from "@/lib/review/preview";
 import type { Anchor, Deliverable, DeliverableStatus, Role, Thread } from "@/lib/review/types";
+import { cx } from "@/utils/cx";
 import { CommentableText } from "./commentable-text";
 import { DiffView } from "./diff-view";
 import { PostPreview, ProfilePreview } from "./linkedin-preview";
 
 type Tab = "review" | "versions" | "preview";
+const STATUS_COLOR = { draft: "gray", in_review: "brand", changes_requested: "warning", approved: "success" } as const;
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
 export function DeliverableReview({ deliverable, role = "client_owner", backHref = "/demo/review" }: { deliverable: Deliverable; role?: Role; backHref?: string }) {
@@ -56,58 +64,53 @@ export function DeliverableReview({ deliverable, role = "client_owner", backHref
   }
 
   const prev = deliverable.versions.length > 1 ? deliverable.versions[deliverable.versions.length - 2] : latest;
+  const versionItems = deliverable.versions.map((v) => ({ id: String(v.n), label: v.n === latest.n ? t("review.versionLatest", "en", { n: v.n }) : t("review.version", "en", { n: v.n }) }));
 
   return (
-    <div className="space-y-6 pb-28">
-      <div className="space-y-3">
-        <Link href={backHref} className="inline-flex min-h-10 items-center text-sm text-ink-subtle hover:text-ink">← {t("review.back")}</Link>
+    <div className="flex flex-col gap-6 pb-28">
+      <div className="flex flex-col gap-3">
+        <div><Button href={backHref} color="link-gray" size="sm" iconLeading={ArrowLeft}>{t("review.back")}</Button></div>
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.6px]">{deliverable.title}</h1>
-          <Badge tone={status === "approved" ? "success" : "neutral"} className="shrink-0">{t(`review.status.${status}` as "review.status.draft")}</Badge>
+          <h1 className="text-display-sm font-semibold text-primary">{deliverable.title}</h1>
+          <Badge size="md" color={STATUS_COLOR[status]} className="shrink-0">{t(`review.status.${status}` as "review.status.draft")}</Badge>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="sr-only" htmlFor="version-select">{t("review.version", "en", { n: "" })}</label>
-          <Select id="version-select" value={versionN} onChange={(e) => setVersionN(Number(e.target.value))} className="w-auto!">
-            {deliverable.versions.map((v) => (
-              <option key={v.n} value={v.n}>{v.n === latest.n ? t("review.versionLatest", "en", { n: v.n }) : t("review.version", "en", { n: v.n })}</option>
-            ))}
+        <div className="flex flex-wrap items-end gap-3">
+          <Select size="sm" aria-label={t("review.version", "en", { n: "" })} className="w-52" items={versionItems} selectedKey={String(versionN)} onSelectionChange={(k) => setVersionN(Number(k))}>
+            {(item) => <Select.Item id={item.id} label={item.label} />}
           </Select>
-          <span className="text-sm text-ink-subtle">{version.createdBy} · {fmt(version.createdAt)}</span>
+          <span className="pb-2 text-sm text-tertiary">{version.createdBy} · {fmt(version.createdAt)}</span>
         </div>
       </div>
 
-      <div role="tablist" aria-label={deliverable.title} className="grid grid-cols-3 gap-2">
-        {(["review", "versions", "preview"] as const).map((k) => (
-          <button key={k} role="tab" aria-selected={tab === k} id={`tab-${k}`} aria-controls={`panel-${k}`} onClick={() => setTab(k)}
-            className={cn("min-h-10 rounded-md border px-2 text-sm transition-colors", tab === k ? "border-accent text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}>
-            {t(`review.tab.${k}` as "review.tab.review")}
-          </button>
-        ))}
-      </div>
+      <Tabs selectedKey={tab} onSelectionChange={(k) => setTab(String(k) as Tab)}>
+        <Tabs.List type="button-border" size="sm" className="w-full" items={(["review", "versions", "preview"] as const).map((k) => ({ id: k, label: t(`review.tab.${k}` as "review.tab.review") }))}>
+          {(item) => <Tabs.Item {...item} />}
+        </Tabs.List>
 
-      {!viewingLatest && status === "in_review" && <p className="rounded-lg border border-hairline-strong bg-surface-1 px-4 py-3 text-sm text-ink-muted" role="status">{t("review.viewingOld")}</p>}
+        {!viewingLatest && status === "in_review" && <p className="mt-4 rounded-lg bg-secondary p-3 text-sm text-secondary ring-1 ring-secondary" role="status">{t("review.viewingOld")}</p>}
 
-      {tab === "review" && (
-        <section id="panel-review" role="tabpanel" aria-labelledby="tab-review" className="space-y-6">
-          {locked && <p className="rounded-lg border border-hairline-strong bg-surface-1 px-4 py-3 text-sm text-ink-muted" role="status">{t("review.locked")}</p>}
+        <Tabs.Panel id="review" className="flex flex-col gap-6 pt-6">
+          {locked && (
+            <p className="flex items-center gap-2 rounded-lg bg-secondary p-3 text-sm text-secondary ring-1 ring-secondary" role="status"><Lock01 aria-hidden className="size-4 text-fg-quaternary" />{t("review.locked")}</p>
+          )}
           <CommentableText text={text} anchors={anchors} activeId={activeId} disabled={!commentsOpen} onSelect={setPending} onPick={pick} />
 
           {commentsOpen && (
             pending ? (
-              <Card className="space-y-3">
-                <p className="text-sm text-ink-subtle">{t("review.commentOnSelection")}: <q className="text-ink">{pending.quote.length > 80 ? `${pending.quote.slice(0, 80)}…` : pending.quote}</q></p>
-                <Textarea aria-label={t("review.commentPlaceholder")} placeholder={t("review.commentPlaceholder")} value={draft} onChange={(e) => setDraft(e.target.value)} />
+              <div className="flex flex-col gap-3 rounded-xl bg-primary p-4 shadow-xs ring-1 ring-secondary">
+                <p className="text-sm text-tertiary">{t("review.commentOnSelection")}: <q className="text-primary">{pending.quote.length > 80 ? `${pending.quote.slice(0, 80)}…` : pending.quote}</q></p>
+                <TextArea aria-label={t("review.commentPlaceholder")} placeholder={t("review.commentPlaceholder")} value={draft} onChange={setDraft} rows={3} />
                 <div className="flex gap-3">
-                  <Button onClick={postComment} disabled={!draft.trim()}>{t("review.post")}</Button>
-                  <Button variant="ghost" onClick={() => { setPending(null); setDraft(""); }}>{t("review.cancel")}</Button>
+                  <Button onPress={postComment} isDisabled={!draft.trim()}>{t("review.post")}</Button>
+                  <Button color="tertiary" onPress={() => { setPending(null); setDraft(""); }}>{t("review.cancel")}</Button>
                 </div>
-              </Card>
-            ) : <p className="text-sm text-ink-subtle">{t("review.commentHint")}</p>
+              </div>
+            ) : <p className="text-sm text-tertiary">{t("review.commentHint")}</p>
           )}
 
-          <div className="space-y-3">
-            <h2 className="text-[13px] font-medium tracking-[0.4px] text-ink-subtle uppercase">{t("review.threads", "en", { n: threads.length })}</h2>
-            {threads.length === 0 && <p className="text-ink-muted">{t("review.noComments")}</p>}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-secondary">{t("review.threads", "en", { n: threads.length })}</h2>
+            {threads.length === 0 && <p className="text-md text-tertiary">{t("review.noComments")}</p>}
             {placed.map(({ th, anchor }) => (
               <ThreadCard key={th.id} th={th} orphaned={!anchor} active={activeId === th.id} locked={!commentsOpen}
                 onActivate={() => setActiveId(th.id)}
@@ -115,13 +118,11 @@ export function DeliverableReview({ deliverable, role = "client_owner", backHref
                 onReply={(body) => patchThread(th.id, (x) => ({ ...x, replies: [...x.replies, { id: `r${Date.now()}`, author: SAMPLE_CLIENT.name, body, at: new Date().toISOString() }] }))} />
             ))}
           </div>
-        </section>
-      )}
+        </Tabs.Panel>
 
-      {tab === "versions" && <VersionsPanel deliverable={deliverable} />}
+        <Tabs.Panel id="versions" className="pt-6"><VersionsPanel deliverable={deliverable} /></Tabs.Panel>
 
-      {tab === "preview" && (
-        <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" className="space-y-4">
+        <Tabs.Panel id="preview" className="flex flex-col gap-4 pt-6">
           {deliverable.kind === "profile" && version.profile ? (
             <div className="grid gap-6 md:grid-cols-2">
               {prev.profile && prev.n !== version.n && <ProfilePreview profile={prev.profile} label={t("review.preview.old")} />}
@@ -129,39 +130,54 @@ export function DeliverableReview({ deliverable, role = "client_owner", backHref
             </div>
           ) : deliverable.kind === "post" ? (
             <PostPreview author={SAMPLE_CLIENT.name} headline={SAMPLE_CLIENT.headline} text={version.content} />
-          ) : <p className="text-ink-muted">{t("review.preview.none")}</p>}
-        </section>
-      )}
+          ) : <p className="text-md text-tertiary">{t("review.preview.none")}</p>}
+        </Tabs.Panel>
+      </Tabs>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-canvas/95 px-4 py-3 backdrop-blur lg:left-[280px]">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-secondary bg-primary/95 px-4 py-3 backdrop-blur lg:left-[280px]">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           {status === "approved" && approved ? (
-            <p className="text-sm text-ink-muted" role="status">{t("review.approvedBy", "en", { name: approved.by, date: fmt(approved.at) })}</p>
+            <p className="flex items-center gap-2 text-sm text-secondary" role="status"><CheckCircle aria-hidden className="size-5 shrink-0 text-fg-success-primary" />{t("review.approvedBy", "en", { name: approved.by, date: fmt(approved.at) })}</p>
           ) : status === "changes_requested" || changesSent ? (
-            <p className="text-sm text-ink-muted" role="status">{t("review.changesRequested")}</p>
+            <p className="text-sm text-secondary" role="status">{t("review.changesRequested")}</p>
           ) : (
             <>
-              <Button variant="secondary" disabled={!approval.allowed || !viewingLatest} onClick={() => setDialog("changes")}>{t("review.requestChanges")}</Button>
-              <Button disabled={!approval.allowed || !viewingLatest} onClick={() => setDialog("approve")}>{t("review.approve")}</Button>
+              <Button color="secondary" isDisabled={!approval.allowed || !viewingLatest} onPress={() => setDialog("changes")}>{t("review.requestChanges")}</Button>
+              <Button isDisabled={!approval.allowed || !viewingLatest} onPress={() => setDialog("approve")}>{t("review.approve")}</Button>
             </>
           )}
         </div>
       </div>
 
-      <Dialog open={dialog === "approve"} onClose={() => setDialog(null)} title={t("review.approveTitle")}>
-        <p className="mb-5 text-ink-muted">{t("review.approveBody", "en", { unlock: deliverable.unlocks ?? "" })}</p>
-        <div className="flex justify-end gap-3">
-          <Button variant="ghost" onClick={() => setDialog(null)}>{t("review.cancel")}</Button>
-          <Button onClick={() => { setStatus("approved"); setApproved({ by: SAMPLE_CLIENT.name, at: new Date().toISOString(), versionN: version.n }); setDialog(null); }}>{t("review.confirmApprove")}</Button>
-        </div>
-      </Dialog>
-      <Dialog open={dialog === "changes"} onClose={() => setDialog(null)} title={t("review.changesTitle")}>
-        <Textarea aria-label={t("review.changesTitle")} placeholder={t("review.changesPlaceholder")} value={changeNote} onChange={(e) => setChangeNote(e.target.value)} />
-        <div className="mt-5 flex justify-end gap-3">
-          <Button variant="ghost" onClick={() => setDialog(null)}>{t("review.cancel")}</Button>
-          <Button disabled={!changeNote.trim()} onClick={() => { setStatus("changes_requested"); setChangesSent(true); setDialog(null); }}>{t("review.sendChanges")}</Button>
-        </div>
-      </Dialog>
+      <ModalOverlay isOpen={dialog === "approve"} onOpenChange={(o) => { if (!o) setDialog(null); }} isDismissable>
+        <Modal className="max-w-md">
+          <Dialog>
+            <div className="flex flex-col gap-4 p-6">
+              <AriaHeading slot="title" className="text-lg font-semibold text-primary">{t("review.approveTitle")}</AriaHeading>
+              <p className="text-md text-tertiary">{t("review.approveBody", "en", { unlock: deliverable.unlocks ?? "" })}</p>
+              <div className="flex justify-end gap-3">
+                <Button color="tertiary" onPress={() => setDialog(null)}>{t("review.cancel")}</Button>
+                <Button onPress={() => { setStatus("approved"); setApproved({ by: SAMPLE_CLIENT.name, at: new Date().toISOString(), versionN: version.n }); setDialog(null); }}>{t("review.confirmApprove")}</Button>
+              </div>
+            </div>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+
+      <ModalOverlay isOpen={dialog === "changes"} onOpenChange={(o) => { if (!o) setDialog(null); }} isDismissable>
+        <Modal className="max-w-md">
+          <Dialog>
+            <div className="flex flex-col gap-4 p-6">
+              <AriaHeading slot="title" className="text-lg font-semibold text-primary">{t("review.changesTitle")}</AriaHeading>
+              <TextArea aria-label={t("review.changesTitle")} placeholder={t("review.changesPlaceholder")} value={changeNote} onChange={setChangeNote} rows={4} />
+              <div className="flex justify-end gap-3">
+                <Button color="tertiary" onPress={() => setDialog(null)}>{t("review.cancel")}</Button>
+                <Button isDisabled={!changeNote.trim()} onPress={() => { setStatus("changes_requested"); setChangesSent(true); setDialog(null); }}>{t("review.sendChanges")}</Button>
+              </div>
+            </div>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
     </div>
   );
 }
@@ -172,16 +188,15 @@ function VersionsPanel({ deliverable }: { deliverable: Deliverable }) {
   const [to, setTo] = useState(vs[vs.length - 1].n);
   const a = vs.find((v) => v.n === from) ?? vs[0];
   const b = vs.find((v) => v.n === to) ?? vs[vs.length - 1];
+  const items = vs.map((v) => ({ id: String(v.n), label: t("review.version", "en", { n: v.n }) }));
   return (
-    <section id="panel-versions" role="tabpanel" aria-labelledby="tab-versions" className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-sm text-ink-subtle" htmlFor="diff-from">{t("review.diff.from")}</label>
-        <Select id="diff-from" className="w-auto!" value={from} onChange={(e) => setFrom(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
-        <label className="text-sm text-ink-subtle" htmlFor="diff-to">{t("review.diff.to")}</label>
-        <Select id="diff-to" className="w-auto!" value={to} onChange={(e) => setTo(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end gap-3">
+        <Select size="sm" label={t("review.diff.from")} className="w-40" items={items} selectedKey={String(from)} onSelectionChange={(k) => setFrom(Number(k))}>{(item) => <Select.Item id={item.id} label={item.label} />}</Select>
+        <Select size="sm" label={t("review.diff.to")} className="w-40" items={items} selectedKey={String(to)} onSelectionChange={(k) => setTo(Number(k))}>{(item) => <Select.Item id={item.id} label={item.label} />}</Select>
       </div>
       <DiffView from={versionText(a)} to={versionText(b)} />
-    </section>
+    </div>
   );
 }
 
@@ -190,22 +205,26 @@ function ThreadCard({ th, orphaned, active, locked, onActivate, onResolve, onRep
 }) {
   const [reply, setReply] = useState("");
   return (
-    <Card id={`thread-${th.id}`} className={cn("space-y-3 p-4", th.resolved && "opacity-70", active && "border-accent")} onClick={onActivate}>
-      <p className="border-l-2 border-hairline-strong pl-3 text-sm text-ink-subtle">“{th.anchor.quote}”</p>
-      {orphaned && <p className="text-sm text-ink">{t("review.orphaned")}</p>}
-      <div><p className="text-sm font-medium">{th.author}</p><p className="text-ink-muted">{th.body}</p></div>
+    <div
+      id={`thread-${th.id}`} onClick={onActivate}
+      className={cx("flex flex-col gap-3 rounded-xl bg-primary p-4 shadow-xs ring-1", th.resolved && "opacity-70", active ? "ring-brand" : "ring-secondary")}
+    >
+      <p className="border-l-2 border-secondary pl-3 text-sm text-quaternary">“{th.anchor.quote}”</p>
+      {orphaned && <p className="text-sm text-secondary">{t("review.orphaned")}</p>}
+      <div><p className="text-sm font-medium text-primary">{th.author}</p><p className="text-tertiary">{th.body}</p></div>
       {th.replies.map((r) => (
-        <div key={r.id} className="border-l-2 border-hairline pl-3"><p className="text-sm font-medium">{r.author}</p><p className="text-ink-muted">{r.body}</p></div>
+        <div key={r.id} className="border-l-2 border-secondary pl-3"><p className="text-sm font-medium text-primary">{r.author}</p><p className="text-tertiary">{r.body}</p></div>
       ))}
       {!locked && !th.resolved && (
-        <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (reply.trim()) { onReply(reply.trim()); setReply(""); } }}>
-          <input aria-label={t("review.replyPlaceholder")} placeholder={t("review.replyPlaceholder")} value={reply} onChange={(e) => setReply(e.target.value)}
-            className="min-h-10 min-w-0 flex-1 rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink placeholder:text-ink-subtle" />
-          <Button type="submit" variant="secondary" disabled={!reply.trim()}>{t("review.reply")}</Button>
+        <form className="flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (reply.trim()) { onReply(reply.trim()); setReply(""); } }}>
+          <Input size="sm" className="min-w-0 flex-1" aria-label={t("review.replyPlaceholder")} placeholder={t("review.replyPlaceholder")} value={reply} onChange={setReply} />
+          <Button type="submit" color="secondary" size="sm" isDisabled={!reply.trim()}>{t("review.reply")}</Button>
         </form>
       )}
-      {!locked && <Button variant="ghost" onClick={onResolve}>{th.resolved ? t("review.reopen") : t("review.resolve")}</Button>}
-      {th.resolved && <Badge>{t("review.resolved")}</Badge>}
-    </Card>
+      <div className="flex items-center gap-2">
+        {!locked && <Button color="tertiary" size="sm" onPress={onResolve}>{th.resolved ? t("review.reopen") : t("review.resolve")}</Button>}
+        {th.resolved && <Badge size="sm" color="gray">{t("review.resolved")}</Badge>}
+      </div>
+    </div>
   );
 }

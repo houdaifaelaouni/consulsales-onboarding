@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { AlertCircle, CheckCircle } from "@untitledui/icons";
+import { Button } from "@/components/base/buttons/button";
+import { Input } from "@/components/base/input/input";
+import { Frame } from "@/components/shell/frame";
 import { Logo } from "@/components/shell/logo";
-import { createClient } from "@/lib/supabase/client";
 import { t } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,30 +28,26 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-4">
-      <Logo />
-      <div className="space-y-2">
-        <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.6px]">{t("login.title")}</h1>
-        <p className="text-ink-muted">{t("login.subtitle")}</p>
+    <main className="grid min-h-screen place-items-center px-4 py-10">
+      <div className="flex w-full max-w-sm flex-col gap-8">
+        <div className="flex justify-center"><Logo /></div>
+        <Frame className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-display-xs font-semibold text-primary">{t("login.title")}</h1>
+            <p className="text-sm text-tertiary">{t("login.subtitle")}</p>
+          </div>
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <Input type="email" label={t("login.email")} isRequired autoComplete="email" value={email} onChange={setEmail} placeholder="you@company.com" />
+            <Button type="submit" size="lg" isLoading={state === "sending"} className="w-full">{t("login.submit")}</Button>
+          </form>
+          {state === "sent" && (
+            <p role="status" className="flex items-start gap-2 rounded-lg bg-success-secondary p-3 text-sm text-success-primary"><CheckCircle aria-hidden className="mt-0.5 size-4 shrink-0" />{t("login.sent")}</p>
+          )}
+          {state === "error" && (
+            <p role="alert" className="flex items-start gap-2 rounded-lg bg-error-primary p-3 text-sm text-error-primary"><AlertCircle aria-hidden className="mt-0.5 size-4 shrink-0" />{t("login.error")}</p>
+          )}
+        </Frame>
       </div>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <label htmlFor="email" className="block text-[13px] font-medium tracking-[0.4px] text-ink-subtle">
-          {t("login.email")}
-        </label>
-        <input
-          id="email" type="email" required autoComplete="email" value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-hairline bg-surface-1 px-3 py-2 text-ink placeholder:text-ink-subtle"
-        />
-        <button
-          type="submit" disabled={state === "sending"}
-          className="w-full rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-        >
-          {t("login.submit")}
-        </button>
-      </form>
-      {state === "sent" && <p role="status" className="text-success">{t("login.sent")}</p>}
-      {state === "error" && <p role="alert" className="text-ink-muted">{t("login.error")}</p>}
     </main>
   );
 }
