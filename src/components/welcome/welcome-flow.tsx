@@ -8,6 +8,7 @@ import { Input } from "@/components/base/input/input";
 import { RadioButton, RadioGroup } from "@/components/base/radio-buttons/radio-buttons";
 import { Slider } from "@/components/base/slider/slider";
 import { BookingPicker, type BookingStore } from "@/components/booking/booking-picker";
+import { Frame } from "@/components/shell/frame";
 import { Logo } from "@/components/shell/logo";
 import { describeSlot, generateSlots, KICKOFF_MINUTES, type BookingPlan } from "@/lib/booking/logic";
 import { t, tDynamic } from "@/lib/i18n";
@@ -21,18 +22,6 @@ import { cx } from "@/utils/cx";
 /** Where the new client is on the 30-day trail when they arrive: payment done, intake next. */
 const CURRENT_TRAIL = 1;
 const TZ_FALLBACK = "UTC";
-
-/** A framed panel with corner marks, the visual anchor of each step. */
-function Frame({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cx("relative rounded-xl bg-primary p-5 shadow-xs ring-1 ring-secondary sm:p-6", className)}>
-      {["-top-2 -left-2", "-top-2 -right-2", "-bottom-2 -left-2", "-bottom-2 -right-2"].map((pos) => (
-        <span key={pos} aria-hidden className={cx("absolute z-0 hidden size-4 items-center justify-center text-base leading-none text-quaternary sm:flex", pos)}>+</span>
-      ))}
-      {children}
-    </div>
-  );
-}
 
 export function WelcomeFlow({ name, plan, now, dashboardHref, store, storageKey = "welcome-flow" }: {
   name: string; plan: BookingPlan; now: string; dashboardHref: string; store: BookingStore; storageKey?: string;

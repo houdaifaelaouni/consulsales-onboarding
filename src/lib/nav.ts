@@ -1,6 +1,6 @@
 import type { MessageKey } from "@/lib/i18n";
 
-export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients" | "welcome";
+export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients" | "welcome" | "integrations";
 export interface NavItem { href: string; label: MessageKey; icon: NavIcon }
 
 /** Demo area: every finished screen, on sample data. */
@@ -12,11 +12,25 @@ export const DEMO_NAV: NavItem[] = [
   { href: "/demo/payments", label: "nav.payments", icon: "payments" },
   { href: "/demo/booking", label: "nav.booking", icon: "booking" },
   { href: "/demo/admin", label: "nav.clients", icon: "clients" },
+  { href: "/demo/integrations", label: "nav.integrations", icon: "integrations" },
   { href: "/welcome", label: "nav.welcome", icon: "welcome" },
 ];
 
-/** Client area. More links arrive as each screen gets wired to real data. */
-export const APP_NAV: NavItem[] = [{ href: "/app", label: "nav.home", icon: "overview" }];
+/** Client side: what a client sees. */
+export const APP_NAV: NavItem[] = [
+  { href: "/app", label: "nav.home", icon: "overview" },
+  { href: "/app/intake", label: "nav.intake", icon: "intake" },
+  { href: "/app/access", label: "nav.access", icon: "access" },
+  { href: "/app/deliverables", label: "nav.review", icon: "review" },
+  { href: "/app/payments", label: "nav.payments", icon: "payments" },
+  { href: "/app/booking", label: "nav.booking", icon: "booking" },
+];
+
+/** Admin side: the team's tools. Never shown to clients. */
+export const ADMIN_NAV: NavItem[] = [
+  { href: "/admin", label: "nav.adminClients", icon: "clients" },
+  { href: "/admin/integrations", label: "nav.integrations", icon: "integrations" },
+];
 
 /**
  * A link is active on its own page and on pages beneath it (/demo/review/icp keeps "Deliverables" lit).
@@ -24,6 +38,7 @@ export const APP_NAV: NavItem[] = [{ href: "/app", label: "nav.home", icon: "ove
  */
 export function isActive(pathname: string, href: string, opts: { exact?: boolean } = {}): boolean {
   const path = pathname.replace(/\/+$/, "") || "/";
+  if (href === "/admin") return path === href || path.startsWith("/admin/clients/"); // the clients board owns its detail pages
   if (opts.exact || href === "/app" || href === "/demo") return path === href;
   return path === href || path.startsWith(`${href}/`);
 }

@@ -28,7 +28,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-export function ClientDetail({ client, now }: { client: AdminClient; now: string }) {
+export function ClientDetail({ client, now, backHref = "/demo/admin" }: { client: AdminClient; now: string; backHref?: string }) {
   const clock = new Date(now);
   const flags = computeFlags(client, clock);
   const [notes, setNotes] = useState(client.notes);
@@ -38,7 +38,7 @@ export function ClientDetail({ client, now }: { client: AdminClient; now: string
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 lg:px-8">
       <header className="flex flex-col gap-4">
-        <div><Button href="/demo/admin" color="link-gray" size="sm" iconLeading={ArrowLeft}>{t("admin.detail.back")}</Button></div>
+        <div><Button href={backHref} color="link-gray" size="sm" iconLeading={ArrowLeft}>{t("admin.detail.back")}</Button></div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-display-sm font-semibold text-primary">{client.company}</h1>
           <Badge size="md" color="brand">{t(`admin.stage.${client.stage}` as "admin.stage.intake")}</Badge>

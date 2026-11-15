@@ -12,11 +12,15 @@ export default function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setState("sending");
-    const { error } = await createClient().auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${location.origin}/auth/callback`, shouldCreateUser: false },
-    });
-    setState(error ? "error" : "sent");
+    try {
+      const { error } = await createClient().auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${location.origin}/auth/callback`, shouldCreateUser: false },
+      });
+      setState(error ? "error" : "sent");
+    } catch {
+      setState("error"); // for example, Supabase keys missing in this environment
+    }
   }
 
   return (

@@ -15,14 +15,16 @@ export const DEMO_TASKS: HomeTask[] = [
   { id: "t7", type: "approve_profile", status: "todo", dueAt: inH(260) },
 ];
 
-/** In the demo, each task opens the finished demo screen that handles it. */
-export function demoTaskHref(type: string): string {
+/** Which screen handles a task. The same mapping serves the demo and the live client side. */
+export function taskHref(type: string, base: "/demo" | "/app"): string {
   switch (type) {
-    case "book_kickoff": return "/demo/booking";
-    case "complete_intake": return "/demo/intake";
+    case "book_kickoff": return `${base}/booking`;
+    case "complete_intake": return `${base}/intake`;
     case "connect_linkedin":
     case "connect_crm":
-    case "upload_brand_files": return "/demo/access";
-    default: return "/demo/review";
+    case "upload_brand_files": return `${base}/access`;
+    default: return base === "/demo" ? "/demo/review" : "/app/deliverables";
   }
 }
+
+export const demoTaskHref = (type: string) => taskHref(type, "/demo");
