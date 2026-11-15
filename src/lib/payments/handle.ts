@@ -16,6 +16,14 @@ export interface HandleResult { status: number; body: Record<string, unknown> }
  * One paid payment in, one answer for Whop out. Anything we cannot recognise or that does not cover its price answers 422, so the
  * failed delivery is visible in the Whop dashboard instead of silently succeeding.
  */
+/** A charge we asked for was declined. Remember it so the page can offer a secure pay link and the daily job can retry. */
+export async function handleFailedPayment(deps: HandleDeps, payment: NormalizedPayment, reason: string): Promise<HandleResult> {
+  const kind = classifyPayment(payment, deps.env);
+  if (kind.type !== "stage") return { status: 200, body: { ok: true, ignored: "not a stage payment" } };
+  await deps.stageRepo.markChargeFailed(kind.workspaceId, kind.stage, reason);
+  return { status: 200, body: { ok: true, result: "failure_recorded" } };
+}
+
 export async function handlePayment(deps: HandleDeps, payment: NormalizedPayment): Promise<HandleResult> {
   const kind = classifyPayment(payment, deps.env);
   if (kind.type === "unknown") return { status: 422, body: { error: "unrecognised payment", reason: kind.reason } };

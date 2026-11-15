@@ -7,6 +7,8 @@ export interface StageRepo {
   /** Marks it paid. Returns false when it was already paid (or does not exist). */
   markPaid(workspaceId: string, stage: number): Promise<boolean>;
   logPaid(workspaceId: string, stage: number, paymentId: string): Promise<void>;
+  /** The card was declined (or the charge failed) after we asked. Only a short reason is kept. */
+  markChargeFailed(workspaceId: string, stage: number, reason: string): Promise<void>;
 }
 
 export type StageResult = "paid" | "already_paid" | "rejected";

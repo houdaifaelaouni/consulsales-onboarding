@@ -49,8 +49,8 @@ describe("whop webhook parsing", () => {
   });
 
   it("ignores other event types", () => {
-    const body = JSON.stringify({ id: "msg_x", type: "payment.failed", data: {} });
-    expect(provider().parseWebhook(body, signed(body, { id: "msg_x" }))).toEqual({ kind: "ignored", type: "payment.failed" });
+    const body = JSON.stringify({ id: "msg_x", type: "membership.went_valid", data: {} });
+    expect(provider().parseWebhook(body, signed(body, { id: "msg_x" }))).toEqual({ kind: "ignored", type: "membership.went_valid" });
   });
 
   it("ignores a payment that is not paid", () => {
@@ -83,3 +83,30 @@ describe("whop checkout", () => {
     await expect(p.createCheckout({ plan: "pro", title: "x", amount: 1, currency: "eur", redirectUrl: "u", metadata: {} })).rejects.toThrow(/not configured/);
   });
 });
+
+describe("whop charging and failures", () => {
+  it("reads a payment.failed as a short reason, never the provider's free text", () => {
+    const body = JSON.stringify({ id: "msg_f", type: "payment.failed", data: { id: "pay_9", status: "failed", currency: "eur", customer_email: "a@b.co", decline_code: "insufficient_funds", failure_message: "Card ending 4242 was declined for John Doe", total: { amount: "750.00", currency: "eur" }, metadata: { kind: "stage", workspace_id: "w", stage: "2" } } });
+    const r = provider().parseWebhook(body, signed(body, { id: "msg_f" }));
+    expect(r).toMatchObject({ kind: "payment_failed", reason: "insufficient_funds" });
+    expect(JSON.stringify(r)).not.toContain("John Doe");
+  });
+
+  it("charges a saved card off-session for exactly the stage amount", async () => {
+    const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+    const fetchImpl = (async (url: string, init: RequestInit) => { calls.push({ url, body: JSON.parse(String(init.body)) }); return { ok: true, json: async () => ({ id: "pay_new" }) }; }) as unknown as typeof fetch;
+    const p = createWhopProvider({ apiKey: "k", accountId: "biz_1", fetchImpl });
+    const r = await p.chargeSavedMethod({ memberId: "mber_1", paymentMethodId: "payt_1", amount: 750, currency: "eur", title: "Stage 2", metadata: { kind: "stage", workspace_id: "w", stage: "2" } });
+    expect(r).toEqual({ id: "pay_new" });
+    expect(calls[0].url).toBe("https://api.whop.com/api/v1/payments");
+    expect(calls[0].body).toMatchObject({ account_id: "biz_1", member_id: "mber_1", payment_method_id: "payt_1", off_session: true, metadata: { stage: "2" } });
+    expect((calls[0].body.line_items as Array<{ variant: Record<string, unknown> }>)[0].variant).toMatchObject({ initial_price: 750, currency: "eur", billing_type: "one_time" });
+  });
+
+  it("refuses to charge when Whop is not configured or rejects the request", async () => {
+    await expect(createWhopProvider({}).chargeSavedMethod({ memberId: "m", paymentMethodId: "p", amount: 1, currency: "eur", title: "t", metadata: {} })).rejects.toThrow();
+    const fetchImpl = (async () => ({ ok: false, status: 402 })) as unknown as typeof fetch;
+    await expect(createWhopProvider({ apiKey: "k", accountId: "b", fetchImpl }).chargeSavedMethod({ memberId: "m", paymentMethodId: "p", amount: 1, currency: "eur", title: "t", metadata: {} })).rejects.toThrow();
+  });
+});
+

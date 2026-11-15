@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sendForReview } from "@/app/admin/clients/[id]/actions";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
@@ -33,11 +34,10 @@ export function DeliveryPanel({ workspaceId, items, changeNotes }: { workspaceId
 function Item({ d, note, onDone }: { d: Deliverable; note?: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<"ok" | "err" | null>(null);
-  const supabase = createClient();
   async function send() {
     setBusy(true); setMsg(null);
-    const { error } = await supabase.rpc("deliverable_submit", { p_id: d.id });
-    setBusy(false); setMsg(error ? "err" : "ok"); if (!error) onDone();
+    const res = await sendForReview(d.id);
+    setBusy(false); setMsg(res.ok ? "ok" : "err"); if (res.ok) onDone();
   }
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-secondary p-4 ring-1 ring-secondary">

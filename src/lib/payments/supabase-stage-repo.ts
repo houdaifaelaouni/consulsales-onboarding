@@ -16,6 +16,10 @@ export function createSupabaseStageRepo(): StageRepo {
       if (error) throw error;
       return (data ?? []).length > 0;
     },
+    async markChargeFailed(workspaceId, stage, reason) {
+      const { error } = await db.from("invoice").update({ charge_error: reason.slice(0, 200) }).eq("workspace_id", workspaceId).eq("stage", stage).is("paid_at", null);
+      if (error) throw error;
+    },
     async logPaid(workspaceId, stage, paymentId) {
       const { error } = await db.from("event_log").insert({ workspace_id: workspaceId, actor: null, action: "invoice.paid", detail: { stage, payment: paymentId } });
       if (error) throw error;

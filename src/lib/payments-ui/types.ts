@@ -17,6 +17,10 @@ export interface StageInvoice {
   /** Hosted payment page and PDF, provided by the payment provider. */
   payUrl?: string;
   pdfUrl?: string;
+  /** The saved card is being charged automatically; the result arrives within moments. */
+  charging?: boolean;
+  /** The automatic charge failed; a secure pay link is shown instead. */
+  chargeFailed?: boolean;
 }
 
 export interface MonthlyPlan {

@@ -42,6 +42,7 @@ function fakeRepo(inv: { amountCents: number | null; paid: boolean } | null): St
     getInvoice: async () => inv,
     markPaid: async () => { if (inv?.paid) return false; r.paid++; if (inv) inv.paid = true; return true; },
     logPaid: async () => { r.logged++; },
+    markChargeFailed: async () => {},
   };
   return r;
 }
