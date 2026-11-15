@@ -33,7 +33,7 @@ begin
   perform public.deliverable_submit('61000000-0000-0000-0000-000000000001');
   select status::text into s from public.task where type = 'approve_icp'; assert s = 'todo', 'sending for review does not complete the approval task';
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000a6","role":"authenticated"}',true);
-  perform public.deliverable_decide('61000000-0000-0000-0000-000000000001','approve');
+  perform public.deliverable_decide('61000000-0000-0000-0000-000000000001','approve',null,1);
   select status::text into s from public.task where type = 'approve_icp'; assert s = 'done', 'approval completes the task';
   select status::text into s from public.task where type = 'complete_intake'; assert s = 'todo', 'intake task untouched';
 end $$;
