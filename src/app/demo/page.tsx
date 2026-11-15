@@ -4,6 +4,7 @@ import { Card } from "@/components/ui";
 const SCREENS = [
   { href: "/demo/intake", title: "Guided intake", note: "Four steps, autosave, resume, not-sure answers" },
   { href: "/demo/access", title: "Access and assets", note: "CRM connect, secure credentials, booking link, brand files" },
+  { href: "/demo/review", title: "Review and approve", note: "Inline comments, version diff, LinkedIn preview, approval" },
 ];
 
 export default function DemoIndex() {
