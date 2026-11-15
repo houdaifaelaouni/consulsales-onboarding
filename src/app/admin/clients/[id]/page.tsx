@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
 import { ClientDetail } from "@/components/admin/client-detail";
-import { PreviewNote } from "@/components/shell/preview-note";
-import { ADMIN_NOW, findClient } from "@/lib/admin/sample";
+import { loadAdminClients } from "@/lib/admin/load";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminClient({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const client = findClient(id);
+  // A malformed id would make the query error; treat it as not found.
+  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const [client] = await loadAdminClients(id);
   if (!client) notFound();
-  return (<><PreviewNote /><ClientDetail client={client} now={ADMIN_NOW} backHref="/admin" /></>);
+  return <ClientDetail client={client} now={new Date().toISOString()} backHref="/admin" />;
 }
