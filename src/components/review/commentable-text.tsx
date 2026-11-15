@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { cn } from "@/lib/cn";
 import { createAnchor, segmentText } from "@/lib/review/comments";
 import type { Anchor } from "@/lib/review/types";
+import { cx } from "@/utils/cx";
 
 export function CommentableText({
   text, anchors, activeId, disabled, onSelect, onPick,
@@ -39,15 +39,17 @@ export function CommentableText({
   const segs = segmentText(text, anchors);
   const byId = new Map(anchors.map((a) => [a.id, a]));
   return (
-    <div ref={ref} className="whitespace-pre-wrap rounded-lg border border-hairline bg-surface-1 p-4 leading-7 text-ink-muted selection:bg-accent/40 selection:text-ink">
+    <div ref={ref} className="rounded-xl bg-primary p-5 leading-7 whitespace-pre-wrap text-secondary shadow-xs ring-1 ring-secondary selection:bg-brand-500/40 selection:text-primary">
       {segs.map((s, i) =>
         s.threadId ? (
           <mark
             key={i} id={`mark-${s.threadId}`} role="button" tabIndex={0} onClick={() => onPick(s.threadId!)}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(s.threadId!); } }}
-            className={cn("cursor-pointer rounded-sm bg-surface-3 px-0.5 text-ink underline decoration-2 underline-offset-4",
-              byId.get(s.threadId)?.resolved ? "decoration-hairline-strong" : "decoration-ink-subtle",
-              activeId === s.threadId && "decoration-accent")}
+            className={cx(
+              "cursor-pointer rounded-sm bg-secondary px-0.5 text-primary underline decoration-2 underline-offset-4 outline-focus-ring focus-visible:outline-2",
+              byId.get(s.threadId)?.resolved ? "decoration-gray-700" : "decoration-gray-500",
+              activeId === s.threadId && "decoration-brand-500",
+            )}
           >
             {s.text}
           </mark>

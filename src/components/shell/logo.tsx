@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { cn } from "@/lib/cn";
+import { cx } from "@/utils/cx";
 
 /**
  * The ConsulSales logo. White version on the dark theme, black version on the light theme.
@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
  */
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex shrink-0", className)}>
+    <span className={cx("inline-flex shrink-0", className)}>
       <Image src="/brand/consulsales-logo-black.svg" alt="ConsulSales" width={175} height={65} unoptimized priority className="h-9 w-auto dark:hidden" />
       <Image src="/brand/consulsales-logo-white.svg" alt="ConsulSales" width={175} height={65} unoptimized priority className="hidden h-9 w-auto dark:block" />
     </span>

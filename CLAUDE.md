@@ -32,19 +32,8 @@ swappable. Verify Whop webhook signatures and make handlers idempotent.
 - **Theme:** dark by default (`dark-mode` class via next-themes). Brand colour is the ConsulSales lavender `#5e6ad2`
   (`--color-brand-*` in `src/styles/theme.css`). In new code use Untitled UI semantic tokens (`bg-primary`, `text-secondary`,
   `border-secondary`, `bg-brand-solid`, ...), not the legacy ones.
-- **Legacy** (`components/ui`, `ink`/`surface`/`hairline`/`accent` tokens) is temporary. Migrate a screen to Untitled UI, then delete
-  what it no longer uses. Remove the legacy block in `src/styles/globals.css` when nothing references it.
+- **Legacy kit removed.** The old `components/ui` and the Linear-style tokens are gone; everything uses Untitled UI components and tokens.
 - ESLint ignores the vendored Untitled UI folders on purpose.
-
-## Design tokens (legacy Linear-style, being replaced)
-- canvas `#010102`; surfaces `#0f1011` / `#141516` / `#18191a`
-- hairline `#23252a`, hairline-strong `#34343a`
-- ink `#f7f8f8`, ink-muted `#d0d6e0`, ink-subtle `#8a8f98`
-- accent/primary `#5e6ad2` (hover `#828fff`), success `#27a644`, danger `#e5484d` (semantic only: admin blocker flags, never decorative)
-- Font Inter; radius 6/8/12/16px, pills for badges; 4px spacing base; **no shadows**
-- Accent only on primary CTA, focus ring, active state
-- Type: display-lg 56/600/-1.8px, headline 28/600/-0.6px, card-title 22/500/-0.4px, body 16/400,
-  eyebrow 13/500/+0.4px, mono 13/400
 
 ## Rules
 - Every table has `workspace_id` and an RLS policy; RLS tests are part of Definition of Done.

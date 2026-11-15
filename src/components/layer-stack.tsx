@@ -15,10 +15,10 @@ export function LayerStack({ completed, locale = "en" }: { completed: number; lo
         const left = `M20 ${y} L80 ${y + 18} L80 ${y + 26} L20 ${y + 8} Z`;
         const right = `M140 ${y} L80 ${y + 18} L80 ${y + 26} L140 ${y + 8} Z`;
         return (
-          <g key={i} strokeWidth="1" strokeLinejoin="round" className="stroke-hairline-strong">
-            <path d={left} className={lit ? "fill-accent-focus" : "fill-surface-2"} />
-            <path d={right} className={lit ? "fill-accent" : "fill-surface-1"} />
-            <path d={top} className={lit ? "fill-accent-hover" : "fill-surface-3"} />
+          <g key={i} strokeWidth="1" strokeLinejoin="round" className="stroke-[var(--color-border-primary)]">
+            <path d={left} className={lit ? "fill-[var(--color-brand-700)]" : "fill-[var(--color-bg-secondary)]"} />
+            <path d={right} className={lit ? "fill-[var(--color-brand-600)]" : "fill-[var(--color-bg-primary)]"} />
+            <path d={top} className={lit ? "fill-[var(--color-brand-400)]" : "fill-[var(--color-bg-tertiary)]"} />
           </g>
         );
       })}
