@@ -15,8 +15,12 @@ FR-xx / NFR-xx) and `docs/ConsulSales-Onboarding-Dev-Plan.pdf` (sprints S0-S7, p
 
 ## Stack
 Next.js 15 (App Router), TypeScript strict, Tailwind, Supabase (EU region) with RLS + Auth (magic
-links) + Storage + Vault, Stripe Billing + Tax, Resend + React Email, Vercel (+ Cron), Vitest,
-Playwright, Sentry.
+links) + Storage + Vault, Resend + React Email, Vercel (+ Cron), Vitest, Playwright, Sentry.
+
+**Payments: Whop, not Stripe** (founder decision, supersedes the PDR/dev plan). Wherever the docs
+say Stripe (checkout, invoices, SEPA, Tax, subscriptions, webhooks, FR-20..FR-23), build it on
+Whop instead. Keep payment code behind a `src/lib/payments/` interface so the provider stays
+swappable. Verify Whop webhook signatures and make handlers idempotent.
 
 ## Design tokens (Linear-style, dark only)
 - canvas `#010102`; surfaces `#0f1011` / `#141516` / `#18191a`
