@@ -25,7 +25,8 @@ test("booking: plan changes the call length, and a failed booking shows an error
   await page.getByRole("button", { name: /Demo plan/ }).click();
   await page.getByRole("option", { name: "Starter (30 min)" }).click();
   await expect(page.getByText("30 minutes with your delivery lead")).toBeVisible();
-  await page.getByLabel("Simulate a failed booking").check();
+  // The real checkbox input is visually hidden; click its visible label like a person would.
+  await page.getByText("Simulate a failed booking").click();
   await page.getByRole("group", { name: "Choose a time" }).getByRole("button").first().click();
   await page.getByRole("button", { name: "Confirm booking" }).click();
   await expect(page.getByRole("alert")).toContainText("We could not book that time");

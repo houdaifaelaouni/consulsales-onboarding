@@ -17,7 +17,7 @@ test("intake blocks Next until required answers, autosaves and resumes", async (
   await pick(page, /monthly recurring revenue/, "10k to 30k");
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByRole("heading", { name: "Clients" })).toBeVisible();
-  await expect(page.getByText("Saved")).toBeVisible();
+  await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
   // Resume at the first unfinished step after a reload.
   await page.reload();
@@ -30,8 +30,9 @@ test("'not sure' satisfies a required question", async ({ page }) => {
   await pick(page, /How big is your team/, "Just me");
   await pick(page, /monthly recurring revenue/, "Under 10k");
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByRole("checkbox", { name: "I am not sure" }).first().check();
-  await page.getByRole("checkbox", { name: "I am not sure" }).nth(1).check();
+  // The real checkbox inputs are visually hidden; click the visible labels.
+  await page.getByText("I am not sure", { exact: true }).first().click();
+  await page.getByText("I am not sure", { exact: true }).nth(1).click();
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByRole("heading", { name: "Voice" })).toBeVisible();
 });

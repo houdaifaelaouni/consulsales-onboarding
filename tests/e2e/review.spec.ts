@@ -5,22 +5,24 @@ test("select text, comment, then approve and lock", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Ideal client profile" }).first()).toBeVisible();
   await expect(page.getByText("Comments (2)")).toBeVisible();
 
-  // Select a phrase inside the text block; the page picks the selection up.
-  await page.evaluate(() => {
-    const root = document.querySelector("div.whitespace-pre-wrap")!;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const i = node.textContent!.indexOf("Head of Marketing");
-      if (i >= 0) {
-        const r = document.createRange();
-        r.setStart(node, i); r.setEnd(node, i + "Head of Marketing".length);
-        const s = document.getSelection()!; s.removeAllRanges(); s.addRange(r);
-        return;
+  // Select a phrase inside the text block; the page picks the selection up once it has loaded, so retry until it does.
+  await expect(async () => {
+    await page.evaluate(() => {
+      const root = document.querySelector("div.whitespace-pre-wrap")!;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const i = node.textContent!.indexOf("Head of Marketing");
+        if (i >= 0) {
+          const r = document.createRange();
+          r.setStart(node, i); r.setEnd(node, i + "Head of Marketing".length);
+          const s = document.getSelection()!; s.removeAllRanges(); s.addRange(r);
+          return;
+        }
       }
-    }
-  });
-  await expect(page.getByText("Comment on:")).toBeVisible();
+    });
+    await expect(page.getByText("Comment on:")).toBeVisible({ timeout: 1000 });
+  }).toPass();
   await page.getByLabel("Write your comment").fill("Add Head of Sales too.");
   await page.getByRole("button", { name: "Post comment" }).click();
   await expect(page.getByText("Comments (3)")).toBeVisible();
@@ -43,7 +45,7 @@ test("request changes needs a note", async ({ page }) => {
   await page.goto("/demo/review/profile");
   await page.getByRole("button", { name: "Request changes" }).click();
   await expect(page.getByRole("button", { name: "Send request" })).toBeDisabled();
-  await page.getByLabel("What should change?").fill("Shorter headline please.");
+  await page.getByRole("textbox", { name: "What should change?" }).fill("Shorter headline please.");
   await page.getByRole("button", { name: "Send request" }).click();
   await expect(page.getByText("You asked for changes.")).toBeVisible();
 });

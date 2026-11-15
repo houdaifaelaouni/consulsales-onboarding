@@ -21,7 +21,8 @@ test("admin board: stats, blockers first, filters, table view and client detail"
   await page.getByRole("tab", { name: "Table" }).click();
   await expect(page.getByRole("grid", { name: "Clients" })).toBeVisible();
 
-  await page.getByRole("link", { name: /Mono Agency/ }).first().click();
+  // Table rows are clickable rows (no inner link).
+  await page.getByRole("row", { name: /Mono Agency/ }).click();
   await expect(page.getByRole("heading", { name: "Mono Agency" })).toBeVisible();
   await expect(page.getByText("Reminder sent: invoice overdue")).toBeVisible();
   await page.getByLabel("Add a note only your team can see").fill("Follow up Monday.");
