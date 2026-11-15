@@ -16,6 +16,7 @@ export interface NormalizedPayment {
 
 export type PaymentEvent =
   | { kind: "payment_succeeded"; payment: NormalizedPayment }
+  | { kind: "payment_failed"; payment: NormalizedPayment; reason: string }
   | { kind: "ignored"; type: string };
 
 export interface CheckoutRequest {
@@ -27,8 +28,19 @@ export interface CheckoutRequest {
   metadata: Record<string, string>;
 }
 
+/** Charge a card the buyer saved earlier, without them present (off-session). The outcome arrives later as a webhook. */
+export interface ChargeRequest {
+  memberId: string;
+  paymentMethodId: string;
+  title: string;
+  amount: number;
+  currency: string;
+  metadata: Record<string, string>;
+}
+
 export interface PaymentProvider {
   readonly name: string;
+  chargeSavedMethod(req: ChargeRequest): Promise<{ id: string }>;
   createCheckout(req: CheckoutRequest): Promise<{ id: string; url: string }>;
   /** Verifies the signature on the raw body and returns a normalized event. Throws if invalid. */
   parseWebhook(rawBody: string, headers: Record<string, string>): PaymentEvent;

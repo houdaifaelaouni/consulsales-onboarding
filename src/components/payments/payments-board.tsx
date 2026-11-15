@@ -114,8 +114,12 @@ function InvoiceCard({ inv, now, onPay }: { inv: StageInvoice; now: Date; onPay:
         )}
         {status === "paid" && inv.paidAt && <p className="text-sm text-success-primary">{t("payments.paidOn", "en", { date: fmtDate(inv.paidAt) })}</p>}
 
-        {(status === "due" || status === "overdue") && (
+        {(status === "due" || status === "overdue") && inv.charging && (
+          <p className="rounded-lg bg-secondary p-3 text-sm text-secondary" role="status">{t("payments.charging", "en", { amount })}</p>
+        )}
+        {(status === "due" || status === "overdue") && !inv.charging && (
           <div className="flex flex-col gap-2">
+            {inv.chargeFailed && <p className="rounded-lg bg-error-primary p-3 text-sm text-error-primary" role="alert">{t("payments.chargeFailed")}</p>}
             <div><Button size="lg" onPress={onPay}>{t("payments.payNow", "en", { amount })}</Button></div>
             <p className="text-sm text-tertiary">{t("payments.methods")}</p>
           </div>

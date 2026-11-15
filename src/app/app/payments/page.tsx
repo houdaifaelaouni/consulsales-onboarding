@@ -29,7 +29,7 @@ export default async function ClientPayments({ searchParams }: { searchParams: P
   // Make sure every unlocked, unpaid stage has its price and secure payment link. Needs the server key and Whop; skipped quietly if missing.
   try { await ensureStageLinks({ db: createAdminClient(), provider: getPaymentProvider(), workspaceId, plan, appUrl: appUrl() }); } catch { /* not switched on yet */ }
 
-  const { data: rows } = await supabase.from("invoice").select("stage,amount_cents,currency,created_at,paid_at,pay_url,pdf_url").eq("workspace_id", workspaceId);
+  const { data: rows } = await supabase.from("invoice").select("stage,amount_cents,currency,created_at,paid_at,pay_url,pdf_url,charge_attempted_at,charge_error").eq("workspace_id", workspaceId);
   const monthly: MonthlyPlan = { title: "Monthly plan", amountCents: PLANS[plan].monthlyPrice * 100, currency: "eur", startsWhen: "From day 30" };
   const invoices = toStageInvoices(rows ?? [], plan);
   const confirming = !!paid && invoices.some((i) => String(i.stage) === paid && !i.paidAt);

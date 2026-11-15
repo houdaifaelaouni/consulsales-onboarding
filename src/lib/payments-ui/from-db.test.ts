@@ -21,4 +21,11 @@ describe("toStageInvoices", () => {
     expect(list.map((i) => i.amountCents)).toEqual([30000, 75000, 75000]);
     expect(toStageInvoices([{ ...rows[0], amount_cents: 74000 }], "pro")[1].amountCents).toBe(74000);
   });
+  it("marks an invoice as being charged, or as failed with a pay link", () => {
+    const base = { stage: 2, amount_cents: 75000, currency: "eur", created_at: "2026-11-01T00:00:00Z", paid_at: null, pay_url: null, pdf_url: null };
+    expect(toStageInvoices([{ ...base, charge_attempted_at: "2026-11-01T01:00:00Z", charge_error: null }], "pro")[1]).toMatchObject({ charging: true });
+    const failed = toStageInvoices([{ ...base, pay_url: "https://pay.example/x", charge_attempted_at: "2026-11-01T01:00:00Z", charge_error: "declined" }], "pro")[1];
+    expect(failed).toMatchObject({ chargeFailed: true, payUrl: "https://pay.example/x" });
+    expect(failed.charging).toBeUndefined();
+  });
 });

@@ -10,7 +10,12 @@ type Db = ReturnType<typeof createAdminClient>;
  */
 export async function ensureStageLinks(opts: { db: Db; provider: PaymentProvider; workspaceId: string; plan: PlanKey; appUrl: string }): Promise<void> {
   const { db, provider, workspaceId, plan, appUrl } = opts;
-  const { data: rows, error } = await db.from("invoice").select("stage").eq("workspace_id", workspaceId).gt("stage", 1).is("paid_at", null).is("pay_url", null);
+  // With a saved card the charge is automatic, so a pay link is only offered after a charge failed (never both at once, so no
+  // double payment). Without a saved card the client pays by link.
+  const { data: bill } = await db.from("billing_account").select("workspace_id").eq("workspace_id", workspaceId).maybeSingle();
+  let q = db.from("invoice").select("stage").eq("workspace_id", workspaceId).gt("stage", 1).is("paid_at", null).is("pay_url", null);
+  if (bill) q = q.not("charge_error", "is", null);
+  const { data: rows, error } = await q;
   if (error || !rows?.length) return;
   const cfg = PLANS[plan];
   for (const { stage } of rows as Array<{ stage: number }>) {

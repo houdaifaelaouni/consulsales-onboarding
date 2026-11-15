@@ -1,7 +1,7 @@
 import { PLANS, type PlanKey } from "@/lib/plans";
 import type { StageInvoice } from "./types";
 
-export interface InvoiceRow { stage: number; amount_cents: number | null; currency: string; created_at: string; paid_at: string | null; pay_url: string | null; pdf_url: string | null }
+export interface InvoiceRow { stage: number; amount_cents: number | null; currency: string; created_at: string; paid_at: string | null; pay_url: string | null; pdf_url: string | null; charge_attempted_at?: string | null; charge_error?: string | null }
 
 /** What each stage is and what unlocks it: charged once the client can see the work it covers. */
 const STAGES: Array<Pick<StageInvoice, "stage" | "title" | "unlockedBy" | "unlocks">> = [
@@ -24,6 +24,9 @@ export function toStageInvoices(rows: InvoiceRow[], plan?: PlanKey): StageInvoic
       ...(r.paid_at ? { paidAt: r.paid_at } : {}),
       ...(r.pay_url ? { payUrl: r.pay_url } : {}),
       ...(r.pdf_url ? { pdfUrl: r.pdf_url } : {}),
+      // Charged automatically: the card is being charged, or the charge failed and a pay link is offered.
+      ...(!r.paid_at && r.charge_attempted_at && !r.charge_error ? { charging: true } : {}),
+      ...(!r.paid_at && r.charge_error ? { chargeFailed: true } : {}),
     };
   });
 }

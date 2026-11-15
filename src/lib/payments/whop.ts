@@ -1,5 +1,5 @@
 import { unwrapWebhook } from "@whop/sdk/helpers";
-import type { CheckoutRequest, PaymentEvent, PaymentProvider } from "./types";
+import type { ChargeRequest, CheckoutRequest, PaymentEvent, PaymentProvider } from "./types";
 
 interface WhopConfig {
   apiKey?: string;
@@ -44,29 +44,49 @@ export function createWhopProvider(cfg: WhopConfig = {}): PaymentProvider {
       return { id: body.id, url: body.purchase_url };
     },
 
+    async chargeSavedMethod(req: ChargeRequest) {
+      if (!apiKey || !accountId) throw new Error("Whop is not configured (WHOP_API_KEY, WHOP_ACCOUNT_ID)");
+      const res = await doFetch(`${baseUrl}/payments`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account_id: accountId,
+          member_id: req.memberId,
+          payment_method_id: req.paymentMethodId,
+          off_session: true,
+          metadata: req.metadata,
+          line_items: [{ variant: { title: req.title, billing_type: "one_time", initial_price: req.amount, currency: req.currency } }],
+        }),
+      });
+      if (!res.ok) throw new Error(`Whop charge failed (${res.status})`);
+      const body = (await res.json()) as { id?: string };
+      if (!body.id) throw new Error("Whop returned no payment id");
+      return { id: body.id };
+    },
+
     parseWebhook(rawBody, headers): PaymentEvent {
       // Throws WebhookVerificationError on a bad signature, stale timestamp or missing headers.
       const event = unwrapWebhook<WhopEnvelope>(rawBody, { headers, key: webhookSecret });
-      if (event.type !== "payment.succeeded") return { kind: "ignored", type: String(event.type) };
+      if (event.type !== "payment.succeeded" && event.type !== "payment.failed") return { kind: "ignored", type: String(event.type) };
       const p = event.data;
-      if (p.status && p.status !== "paid") return { kind: "ignored", type: `payment.${p.status}` };
+      if (event.type === "payment.succeeded" && p.status && p.status !== "paid") return { kind: "ignored", type: `payment.${p.status}` };
       if (!p.customer_email) throw new Error("payment has no customer_email");
-      return {
-        kind: "payment_succeeded",
-        payment: {
-          eventId: event.id,
-          paymentId: p.id,
-          email: p.customer_email.toLowerCase(),
-          amount: p.total?.amount ?? p.amount_charged?.amount ?? "0",
-          currency: p.total?.currency ?? p.currency ?? "eur",
-          planId: p.variant_id ?? undefined,
-          memberId: p.member_id ?? undefined,
-          paymentMethodId: p.payment_method_id ?? undefined,
-          metadata: Object.fromEntries(
-            Object.entries(p.metadata ?? {}).map(([k, v]) => [k, String(v)]),
-          ),
-        },
+      const payment = {
+        eventId: event.id,
+        paymentId: p.id,
+        email: p.customer_email.toLowerCase(),
+        amount: p.total?.amount ?? p.amount_charged?.amount ?? "0",
+        currency: p.total?.currency ?? p.currency ?? "eur",
+        planId: p.variant_id ?? undefined,
+        memberId: p.member_id ?? undefined,
+        paymentMethodId: p.payment_method_id ?? undefined,
+        metadata: Object.fromEntries(
+          Object.entries(p.metadata ?? {}).map(([k, v]) => [k, String(v)]),
+        ),
       };
+      // Only a short code is kept from a failure, never card details or the provider's free text.
+      if (event.type === "payment.failed") return { kind: "payment_failed", payment, reason: String(p.decline_code ?? p.substatus ?? "declined").slice(0, 60) };
+      return { kind: "payment_succeeded", payment };
     },
   };
 }
@@ -81,6 +101,8 @@ interface WhopEnvelope {
     currency?: string;
     customer_email: string | null;
     variant_id?: string | null;
+    decline_code?: string | null;
+    substatus?: string | null;
     member_id?: string | null;
     payment_method_id?: string | null;
     total?: WhopMoney | null;

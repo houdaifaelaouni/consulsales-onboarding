@@ -55,6 +55,12 @@ begin
   ok := false;
   begin delete from public.invoice; exception when others then ok := true; end;
   assert ok, 'no client delete';
+  ok := false;
+  begin update public.invoice set charge_attempts = 0, charge_error = null where stage = 2; exception when others then ok := true; end;
+  assert ok, 'client cannot touch the charge tracking';
+  ok := false;
+  begin perform count(*) from public.billing_account; exception when others then ok := true; end;
+  assert ok, 'client cannot read the saved card ids';
 
   -- Visibility
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000d5","role":"authenticated"}',true);
