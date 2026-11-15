@@ -517,5 +517,19 @@
   "integrations.generate": "Generate for me",
   "payments.confirming": "Thank you. We are confirming your payment with the payment provider. This page updates within a minute, refresh to check.",
   "payments.charging": "We are charging your saved card {amount} for this stage. It usually takes a minute. Refresh to see it marked paid.",
-  "payments.chargeFailed": "We could not charge your saved card. Pay securely with the button below to keep your work moving."
+  "payments.chargeFailed": "We could not charge your saved card. Pay securely with the button below to keep your work moving.",
+  "journey.title": "Your 30 days, step by step",
+  "journey.days": "Days {range}",
+  "journey.stage.1.name": "Foundation",
+  "journey.stage.1.body": "Tell us about your offer, connect your accounts and approve your ideal client.",
+  "journey.stage.1.pay": "Paid today: your €300 start payment",
+  "journey.stage.2.name": "Build",
+  "journey.stage.2.body": "We write your new LinkedIn profile. You review it and approve.",
+  "journey.stage.2.pay": "Charged when your profile is ready for you to see",
+  "journey.stage.3.name": "Launch",
+  "journey.stage.3.body": "We write your DM sequences. You approve, then outreach starts.",
+  "journey.stage.3.pay": "Charged when your DM sequences are ready for you to see",
+  "journey.state.done": "Done",
+  "journey.state.current": "You are here",
+  "journey.state.upcoming": "Coming up"
 }
