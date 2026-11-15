@@ -22,7 +22,8 @@ test("booking: pick a day and time, confirm, get a calendar file", async ({ page
 
 test("booking: plan changes the call length, and a failed booking shows an error with a fallback", async ({ page }) => {
   await page.goto("/demo/booking");
-  await page.getByLabel("Demo plan").selectOption("starter");
+  await page.getByRole("button", { name: /Demo plan/ }).click();
+  await page.getByRole("option", { name: "Starter (30 min)" }).click();
   await expect(page.getByText("30 minutes with your delivery lead")).toBeVisible();
   await page.getByLabel("Simulate a failed booking").check();
   await page.getByRole("group", { name: "Choose a time" }).getByRole("button").first().click();
