@@ -9,8 +9,9 @@ export function DbDeliverable({ deliverable, role, backHref }: { deliverable: De
   return (
     <DeliverableReview
       deliverable={deliverable} role={role} backHref={backHref}
-      onDecide={async (decision, note) => {
-        const { error } = await supabase.rpc("deliverable_decide", { p_id: deliverable.id, p_decision: decision, p_note: note ?? null });
+      onDecide={async (decision, note, versionN) => {
+        const { error } = await supabase.rpc("deliverable_decide", { p_id: deliverable.id, p_decision: decision, p_note: note ?? null, p_version: versionN ?? null });
+        if (error && /newer version/i.test(error.message)) return "stale";
         return !error;
       }}
     />

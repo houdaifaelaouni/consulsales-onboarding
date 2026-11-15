@@ -216,6 +216,7 @@
   "delivery.locked": "Approved. This version is locked.",
   "delivery.clientNote": "Client asked for changes:",
   "review.sendChanges": "Send request",
+  "review.staleVersion": "A newer version arrived while you were reading. Reload the page, read it, then approve.",
   "review.decideError": "We could not save that. Please try again.",
   "review.none.title": "Nothing to review yet",
   "review.none.body": "Your team will post deliverables here as soon as they are ready for you.",

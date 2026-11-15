@@ -36,13 +36,13 @@ begin
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000a5","role":"authenticated"}',true);
   select count(*) into n from public.invoice where stage > 1; assert n = 0, 'nothing billed ahead of the work';
 
-  perform public.deliverable_decide('51000000-0000-0000-0000-000000000001','approve');
+  perform public.deliverable_decide('51000000-0000-0000-0000-000000000001','approve',null,1);
   select count(*) into n from public.invoice where stage = 2 and paid_at is null; assert n = 1, 'ICP approval creates the stage 2 invoice';
   select count(*) into n from public.invoice where stage = 3; assert n = 0, 'stage 3 still locked';
 
-  perform public.deliverable_decide('51000000-0000-0000-0000-000000000002','approve');
+  perform public.deliverable_decide('51000000-0000-0000-0000-000000000002','approve',null,1);
   select count(*) into n from public.invoice where stage = 3; assert n = 0, 'profile alone does not unlock stage 3';
-  perform public.deliverable_decide('51000000-0000-0000-0000-000000000003','approve');
+  perform public.deliverable_decide('51000000-0000-0000-0000-000000000003','approve',null,1);
   select count(*) into n from public.invoice where stage = 3 and paid_at is null; assert n = 1, 'profile plus messages unlock stage 3';
   select count(*) into n from public.event_log where action = 'invoice.unlocked'; assert n = 2, 'unlocks are logged once each';
 
