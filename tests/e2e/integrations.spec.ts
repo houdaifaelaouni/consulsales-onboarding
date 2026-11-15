@@ -4,9 +4,9 @@ test("integrations: every key is listed with its status, and no secret value is 
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/demo/integrations");
   await expect(page.getByRole("heading", { name: "Integrations and keys" })).toBeVisible();
-  await expect(page.getByText("WHOP_API_KEY")).toBeVisible();
-  await expect(page.getByText("SUPABASE_SERVICE_ROLE_KEY")).toBeVisible();
-  await expect(page.getByText("RESEND_API_KEY")).toBeVisible();
+  await expect(page.getByText("WHOP_API_KEY", { exact: true })).toBeVisible();
+  await expect(page.getByText("SUPABASE_SERVICE_ROLE_KEY", { exact: true })).toBeVisible();
+  await expect(page.getByText("RESEND_API_KEY", { exact: true })).toBeVisible();
   await expect(page.getByText("Needs setup").first()).toBeVisible();
   await expect(page.getByText("/api/webhooks/whop").first()).toBeVisible();
   // Sample "set" keys must not leak their sample values into the page.

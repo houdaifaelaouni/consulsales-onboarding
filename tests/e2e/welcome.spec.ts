@@ -22,7 +22,7 @@ test("welcome flow: five steps, live summary, skip, booking and a final summary"
   await page.getByRole("button", { name: "Continue" }).click();
 
   // Access: choose later, then skip the kickoff.
-  await page.getByRole("radio", { name: /I will do this later/ }).check();
+  await page.getByText("I will do this later", { exact: true }).click(); // the radio input itself is visually hidden
   await expect(page.getByText("Access: I will do this later.")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Skip for now" }).click();
