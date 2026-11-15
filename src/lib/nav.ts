@@ -1,6 +1,6 @@
 import type { MessageKey } from "@/lib/i18n";
 
-export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients" | "welcome" | "integrations";
+export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients" | "welcome" | "integrations" | "account";
 export interface NavItem { href: string; label: MessageKey; icon: NavIcon }
 
 /** Demo area: every finished screen, on sample data. */
@@ -24,6 +24,7 @@ export const APP_NAV: NavItem[] = [
   { href: "/app/deliverables", label: "nav.review", icon: "review" },
   { href: "/app/payments", label: "nav.payments", icon: "payments" },
   { href: "/app/booking", label: "nav.booking", icon: "booking" },
+  { href: "/app/account", label: "nav.account", icon: "account" },
 ];
 
 /** Admin side: the team's tools. Never shown to clients. */
