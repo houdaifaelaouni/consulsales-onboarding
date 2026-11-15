@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle, Lock01 } from "@untitledui/icons";
 import { FloatingField } from "@/components/auth/floating-field";
+import { PinPad } from "@/components/auth/pin-pad";
 import { Button } from "@/components/base/buttons/button";
 import { Logo } from "@/components/shell/logo";
 import { passwordProblem } from "@/lib/auth/password";
@@ -11,12 +12,12 @@ import { t, type MessageKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
 /** password = email and password, link = one-time email link, signup = create an account. */
-type Mode = "password" | "link" | "signup";
+type Mode = "password" | "link" | "signup" | "pin";
 type State = "idle" | "sending" | "sent" | "error";
 
-const TITLE: Record<Mode, MessageKey> = { password: "login.title", link: "login.title", signup: "login.signup.title" };
-const SUBTITLE: Record<Mode, MessageKey> = { password: "login.subtitle.password", link: "login.subtitle", signup: "login.signup.subtitle" };
-const SUBMIT: Record<Mode, MessageKey> = { password: "login.submit.password", link: "login.submit", signup: "login.signup.submit" };
+const TITLE: Record<Mode, MessageKey> = { password: "login.title", link: "login.title", signup: "login.signup.title", pin: "login.title" };
+const SUBTITLE: Record<Mode, MessageKey> = { password: "login.subtitle.password", link: "login.subtitle", signup: "login.signup.subtitle", pin: "login.subtitle.pin" };
+const SUBMIT: Record<Mode, MessageKey> = { password: "login.submit.password", link: "login.submit", signup: "login.signup.submit", pin: "login.submit.password" };
 
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("password");
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const [sentAt, setSentAt] = useState(0);
   const [now, setNow] = useState(0);
   const [touched, setTouched] = useState(false);
+  const [pin, setPin] = useState("");
   const emailBad = touched && !looksLikeEmail(email);
   const wait = state === "sent" ? cooldownLeft(sentAt, now) : 0;
 
@@ -36,10 +38,25 @@ export default function LoginPage() {
     return () => clearInterval(id);
   }, [state, wait]);
 
-  function switchMode(next: Mode) { setMode(next); setState("idle"); setProblem(null); setTouched(false); setPassword(""); }
+  function switchMode(next: Mode) { setMode(next); setState("idle"); setProblem(null); setTouched(false); setPassword(""); setPin(""); }
   const done = () => { const at = Date.now(); setSentAt(at); setNow(at); setState("sent"); };
 
+  async function submitPin(code: string) {
+    setTouched(true); setProblem(null);
+    if (!looksLikeEmail(email)) { setPin(""); return; }
+    setState("sending");
+    try {
+      const res = await fetch("/api/auth/pin-login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), pin: code }) });
+      if (res.ok) { window.location.assign("/app"); return; }
+      setProblem("login.error.pin");
+    } catch {
+      setProblem("login.error.pin");
+    }
+    setPin(""); setState("idle");
+  }
+
   async function submit() {
+    if (mode === "pin") return;
     setTouched(true); setProblem(null);
     if (!looksLikeEmail(email)) return;
     if (mode === "signup") { const p = passwordProblem(password, email); if (p) { setProblem(p); return; } }
@@ -101,7 +118,12 @@ export default function LoginPage() {
                   value={email} onChange={(v) => { setEmail(v); if (state === "error") setState("idle"); }}
                   isInvalid={emailBad || state === "error"} describedBy="login-msg"
                 />
-                {mode !== "link" && (
+                {mode === "pin" && (
+                  <div className="flex flex-col items-center gap-4 pt-2">
+                    <PinPad value={pin} onChange={(v) => { setPin(v); setProblem(null); }} onComplete={submitPin} disabled={state === "sending"} isInvalid={!!problem} label={t("pin.label")} />
+                  </div>
+                )}
+                {mode !== "link" && mode !== "pin" && (
                   <FloatingField
                     label={t("login.password")} type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"}
                     value={password} onChange={(v) => { setPassword(v); setProblem(null); }} isInvalid={!!problem} describedBy="login-msg"
@@ -113,15 +135,16 @@ export default function LoginPage() {
                 {!emailBad && problem && <Msg>{t(problem)}</Msg>}
                 {state === "error" && <Msg>{t("login.error")}</Msg>}
               </div>
-              <Button type="submit" size="xl" isLoading={state === "sending"} className="w-full">{t(SUBMIT[mode])}</Button>
+              {mode !== "pin" && <Button type="submit" size="xl" isLoading={state === "sending"} className="w-full">{t(SUBMIT[mode])}</Button>}
             </form>
 
             <div className="flex flex-col items-center gap-1 text-sm">
               {mode === "password" && <>
-                <button type="button" onClick={() => switchMode("link")} className="font-medium text-brand-secondary hover:underline">{t("login.useLink")}</button>
+                <button type="button" onClick={() => switchMode("pin")} className="font-medium text-brand-secondary hover:underline">{t("login.usePin")}</button>
+                <button type="button" onClick={() => switchMode("link")} className="text-tertiary hover:text-primary">{t("login.useLink")}</button>
                 <button type="button" onClick={() => switchMode("signup")} className="text-tertiary hover:text-primary">{t("login.toSignup")}</button>
               </>}
-              {mode === "link" && <button type="button" onClick={() => switchMode("password")} className="font-medium text-brand-secondary hover:underline">{t("login.usePassword")}</button>}
+              {(mode === "link" || mode === "pin") && <button type="button" onClick={() => switchMode("password")} className="font-medium text-brand-secondary hover:underline">{t("login.usePassword")}</button>}
               {mode === "signup" && <button type="button" onClick={() => switchMode("password")} className="font-medium text-brand-secondary hover:underline">{t("login.toSignin")}</button>}
             </div>
           </>
