@@ -11,6 +11,7 @@ export async function getViewer() {
     supabase.from("membership").select("role").eq("user_id", user.id),
   ]);
   return {
+    id: user.id,
     email: user.email ?? "",
     name: (profile.data?.name as string | null) ?? null,
     isAdmin: profile.data?.is_admin === true,
