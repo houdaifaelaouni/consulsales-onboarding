@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("admin board: blockers first, filters, and client detail", async ({ page }) => {
+test("admin board: stats, blockers first, filters, table view and client detail", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/demo/admin");
-  await expect(page.getByRole("heading", { name: "Clients" })).toBeVisible();
-  await expect(page.getByText("3 need attention")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Clients" }).first()).toBeVisible();
+  await expect(page.getByText("Need attention")).toBeVisible();
   await expect(page.getByText("Access blocked 90h")).toBeVisible();
   await expect(page.getByText(/Invoice unpaid 9 days/)).toBeVisible();
 
@@ -11,10 +12,16 @@ test("admin board: blockers first, filters, and client detail", async ({ page })
   const intake = page.getByRole("region", { name: /Intake/ });
   await expect(intake.getByRole("heading", { level: 3 }).first()).toHaveText("Arc Media");
 
-  await page.getByLabel("Owner").selectOption("Mia");
+  // Owner filter (a real select menu).
+  await page.getByRole("button", { name: /Owner/ }).click();
+  await page.getByRole("option", { name: "Mia" }).click();
   await expect(page.getByText("Studio North")).toHaveCount(0);
 
-  await page.getByRole("link", { name: /Mono Agency/ }).click();
+  // Table view lists the same clients, blocked first.
+  await page.getByRole("tab", { name: "Table" }).click();
+  await expect(page.getByRole("grid", { name: "Clients" })).toBeVisible();
+
+  await page.getByRole("link", { name: /Mono Agency/ }).first().click();
   await expect(page.getByRole("heading", { name: "Mono Agency" })).toBeVisible();
   await expect(page.getByText("Reminder sent: invoice overdue")).toBeVisible();
   await page.getByLabel("Add a note only your team can see").fill("Follow up Monday.");
@@ -22,7 +29,7 @@ test("admin board: blockers first, filters, and client detail", async ({ page })
   await expect(page.getByText("Follow up Monday.")).toBeVisible();
 });
 
-test("admin board: no horizontal scroll at 375px", async ({ page }) => {
+test("admin: no horizontal scroll at 375px", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   for (const path of ["/demo/admin", "/demo/admin/mono-agency"]) {
     await page.goto(path);

@@ -14,8 +14,6 @@ const monthly: MonthlyPlan = { title: "Monthly plan", amountCents: 120000, curre
 
 export default function DemoPayments() {
   return (
-    <main className="mx-auto max-w-xl px-4 py-8 sm:py-12">
-      <PaymentsBoard initial={invoices} monthly={monthly} now={NOW} />
-    </main>
+    <PaymentsBoard initial={invoices} monthly={monthly} now={NOW} />
   );
 }
