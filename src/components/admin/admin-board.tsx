@@ -29,12 +29,12 @@ export function AdminBoard({ clients, now }: { clients: AdminClient[]; now: stri
 
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="f-plan" className="text-sm text-ink-subtle">{t("admin.filter.plan")}</label>
-        <Select id="f-plan" className="w-auto" value={plan} onChange={(e) => setPlan(e.target.value)}>
+        <Select id="f-plan" className="w-auto!" value={plan} onChange={(e) => setPlan(e.target.value)}>
           <option value="all">{t("admin.filter.all")}</option>
           {(["starter", "pro", "enterprise"] as const).map((p) => <option key={p} value={p}>{t(`admin.plan.${p}` as "admin.plan.pro")}</option>)}
         </Select>
         <label htmlFor="f-owner" className="text-sm text-ink-subtle">{t("admin.filter.owner")}</label>
-        <Select id="f-owner" className="w-auto" value={owner} onChange={(e) => setOwner(e.target.value)}>
+        <Select id="f-owner" className="w-auto!" value={owner} onChange={(e) => setOwner(e.target.value)}>
           <option value="all">{t("admin.filter.all")}</option>
           {uniqueOwners(clients).map((o) => <option key={o} value={o}>{o}</option>)}
         </Select>

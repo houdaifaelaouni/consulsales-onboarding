@@ -67,7 +67,7 @@ export function DeliverableReview({ deliverable, role = "client_owner" }: { deli
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <label className="sr-only" htmlFor="version-select">{t("review.version", "en", { n: "" })}</label>
-          <Select id="version-select" value={versionN} onChange={(e) => setVersionN(Number(e.target.value))} className="w-auto">
+          <Select id="version-select" value={versionN} onChange={(e) => setVersionN(Number(e.target.value))} className="w-auto!">
             {deliverable.versions.map((v) => (
               <option key={v.n} value={v.n}>{v.n === latest.n ? t("review.versionLatest", "en", { n: v.n }) : t("review.version", "en", { n: v.n })}</option>
             ))}
@@ -176,9 +176,9 @@ function VersionsPanel({ deliverable }: { deliverable: Deliverable }) {
     <section id="panel-versions" role="tabpanel" aria-labelledby="tab-versions" className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-sm text-ink-subtle" htmlFor="diff-from">{t("review.diff.from")}</label>
-        <Select id="diff-from" className="w-auto" value={from} onChange={(e) => setFrom(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
+        <Select id="diff-from" className="w-auto!" value={from} onChange={(e) => setFrom(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
         <label className="text-sm text-ink-subtle" htmlFor="diff-to">{t("review.diff.to")}</label>
-        <Select id="diff-to" className="w-auto" value={to} onChange={(e) => setTo(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
+        <Select id="diff-to" className="w-auto!" value={to} onChange={(e) => setTo(Number(e.target.value))}>{vs.map((v) => <option key={v.n} value={v.n}>{t("review.version", "en", { n: v.n })}</option>)}</Select>
       </div>
       <DiffView from={versionText(a)} to={versionText(b)} />
     </section>
