@@ -3,6 +3,7 @@ import { Card } from "@/components/ui";
 
 const SCREENS = [
   { href: "/demo/intake", title: "Guided intake", note: "Four steps, autosave, resume, not-sure answers" },
+  { href: "/demo/access", title: "Access and assets", note: "CRM connect, secure credentials, booking link, brand files" },
 ];
 
 export default function DemoIndex() {
