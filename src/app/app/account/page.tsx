@@ -3,19 +3,15 @@ import { PasswordForm } from "@/components/auth/password-form";
 import { PinSetup } from "@/components/auth/pin-setup";
 import { getViewer } from "@/lib/auth/viewer";
 import { t } from "@/lib/i18n";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { pinStatus } from "@/lib/auth/pin-status";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
-  // The PIN lives in a table the browser cannot read, so ask the server. If the server key is missing, say so instead of failing.
-  let canSave = true, hasPin = false;
-  try {
-    const { data, error } = await createAdminClient().rpc("pin_exists", { p_user: viewer.id });
-    if (error) canSave = false; else hasPin = data === true;
-  } catch { canSave = false; }
+  const pin = await pinStatus(viewer.id);
+  const canSave = pin !== "unavailable", hasPin = pin === "on";
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-8 lg:px-8">
