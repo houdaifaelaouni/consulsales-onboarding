@@ -30,7 +30,7 @@ describe("classifyPayment", () => {
   });
   it("recognises a stage payment from our own checkout and rejects bad metadata", () => {
     expect(classifyPayment(pay({ metadata: { kind: "stage", workspace_id: WS, stage: "2" } }), env)).toEqual({ type: "stage", workspaceId: WS, stage: 2 });
-    for (const bad of [{ stage: "1" }, { stage: "4" }, { stage: "2", workspace_id: "nope" }]) {
+    for (const bad of [{ stage: "0" }, { stage: "4" }, { stage: "2", workspace_id: "nope" }]) {
       expect(classifyPayment(pay({ metadata: { kind: "stage", workspace_id: WS, ...bad } }), env).type).toBe("unknown");
     }
   });
