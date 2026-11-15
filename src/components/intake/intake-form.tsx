@@ -173,16 +173,14 @@ function Field({ q, answer, invalid, onChange }: {
 }) {
   const notSure = answer?.notSure === true;
   const value = answer?.value ?? "";
-  const hint = invalid ? t("intake.fieldRequired") : undefined;
-  const common = { label: q.label, isDisabled: notSure, isInvalid: invalid, isRequired: q.required, hint } as const;
+  // Help and example sit under the field, where hints belong; a missing answer replaces them with the error.
+  const help = [q.help, q.example ? t("intake.example", "en", { text: q.example }) : null].filter(Boolean).join(" ");
+  const hint = invalid ? t("intake.fieldRequired") : help || undefined;
+  const label = q.required ? q.label : `${q.label} (${t("intake.optional").toLowerCase()})`;
+  const common = { label, isDisabled: notSure, isInvalid: invalid, isRequired: q.required, hint } as const;
 
   return (
     <div data-q={q.key} className="flex flex-col gap-2">
-      <div className="flex flex-col gap-0.5 text-sm text-tertiary">
-        {!q.required && <p className="font-medium text-quaternary">{t("intake.optional")}</p>}
-        {q.help && <p>{q.help}</p>}
-        {q.example && <p>{t("intake.example", "en", { text: q.example })}</p>}
-      </div>
       {q.type === "textarea" && <TextArea {...common} rows={4} value={value} onChange={(v) => onChange({ value: v })} />}
       {q.type === "text" && <Input {...common} type="text" value={value} onChange={(v) => onChange({ value: v })} />}
       {q.type === "number" && <Input {...common} type="number" inputMode="numeric" value={value} onChange={(v) => onChange({ value: v })} />}
