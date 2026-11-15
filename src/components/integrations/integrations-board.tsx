@@ -5,13 +5,15 @@ import { Frame } from "@/components/shell/frame";
 import { INTEGRATIONS, integrationState, summarize, webhookUrl, type EnvStatus, type EnvVar, type IntegrationState } from "@/lib/integrations/config";
 import { t } from "@/lib/i18n";
 import { CopyButton } from "./copy-button";
+import { DeployBar } from "./deploy-bar";
+import { KeyForm } from "./key-form";
 import { RecheckButton } from "./recheck-button";
 
 const STATE_COLOR: Record<IntegrationState, "success" | "warning" | "error" | "gray"> = { ready: "success", partial: "warning", missing: "error", optional: "gray" };
 const KIND_COLOR: Record<EnvVar["kind"], "brand" | "gray" | "warning"> = { public: "gray", config: "brand", secret: "warning" };
 
 /** Shows which keys the server can see. It only ever receives true/false flags, so it cannot leak a value. */
-export function IntegrationsBoard({ status, appUrl, preview = false }: { status: EnvStatus; appUrl?: string; preview?: boolean }) {
+export function IntegrationsBoard({ status, appUrl, preview = false, canSave = false }: { status: EnvStatus; appUrl?: string; preview?: boolean; canSave?: boolean }) {
   const sum = summarize(status);
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 lg:px-8">
@@ -23,6 +25,7 @@ export function IntegrationsBoard({ status, appUrl, preview = false }: { status:
         {!preview && <RecheckButton />}
       </header>
 
+      {!preview && !canSave && <p className="rounded-lg bg-secondary p-3 text-sm text-secondary ring-1 ring-secondary" role="note">{t("integrations.setupSaving")}</p>}
       {preview && <p className="rounded-lg bg-secondary p-3 text-sm text-tertiary ring-1 ring-secondary" role="note">{t("integrations.preview")}</p>}
 
       <section className="grid gap-4 sm:grid-cols-3" aria-label={t("integrations.title")}>
@@ -65,7 +68,8 @@ export function IntegrationsBoard({ status, appUrl, preview = false }: { status:
 
                 <ul className="divide-y divide-secondary overflow-hidden rounded-lg ring-1 ring-secondary">
                   {i.vars.map((v) => (
-                    <li key={v.name} className="flex flex-col gap-2 bg-primary p-3 sm:flex-row sm:items-center sm:gap-4">
+                    <li key={v.name} className="flex flex-col">
+                      <div className="flex flex-col gap-2 bg-primary p-3 sm:flex-row sm:items-center sm:gap-4">
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <code className="truncate font-mono text-sm font-medium text-primary">{v.name}</code>
@@ -82,6 +86,8 @@ export function IntegrationsBoard({ status, appUrl, preview = false }: { status:
                           <Badge size="sm" color={v.required ? "error" : "gray"}>{t("integrations.notSet")}</Badge>
                         )}
                       </div>
+                      </div>
+                      {canSave && !preview && !v.bootstrap && <KeyForm name={v.name} isPublic={v.kind === "public"} isSet={!!status[v.name]} />}
                     </li>
                   ))}
                 </ul>
@@ -102,6 +108,7 @@ export function IntegrationsBoard({ status, appUrl, preview = false }: { status:
           );
         })}
       </ul>
+      <DeployBar />
     </main>
   );
 }

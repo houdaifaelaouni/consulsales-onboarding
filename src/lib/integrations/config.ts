@@ -12,6 +12,8 @@ export interface EnvVar {
   purpose: string;
   /** Shape of the value, never a real one. */
   example: string;
+  /** Needed to save keys from the admin page itself, so it must be added in Vercel by hand, once. */
+  bootstrap?: boolean;
 }
 
 export interface Integration {
@@ -90,6 +92,15 @@ export const INTEGRATIONS: Integration[] = [
     vars: [
       { name: "NEXT_PUBLIC_SENTRY_DSN", kind: "public", required: false, purpose: "Where browser errors are sent.", example: "https://…@o0.ingest.sentry.io/0" },
       { name: "SENTRY_AUTH_TOKEN", kind: "secret", required: false, purpose: "Uploads source maps at build time.", example: "sntrys_…" },
+    ],
+  },
+  {
+    id: "vercel", title: "Saving keys from this page", purpose: "Lets the admin page store keys for you instead of you opening Vercel.",
+    getItFrom: "Vercel → Account Settings → Tokens (create one scoped to your team). The team ID is in Team Settings → General.",
+    unlocks: "The Save buttons on every key below. Add these two in Vercel by hand, once.",
+    vars: [
+      { name: "VERCEL_API_TOKEN", kind: "secret", required: false, purpose: "Token that may change this project's environment variables.", example: "a long token", bootstrap: true },
+      { name: "VERCEL_TEAM_ID", kind: "config", required: false, purpose: "Your Vercel team.", example: "team_…", bootstrap: true },
     ],
   },
   {
