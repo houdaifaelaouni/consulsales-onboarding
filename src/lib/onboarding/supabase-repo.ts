@@ -55,6 +55,10 @@ export function createSupabaseProvisionRepo(): ProvisionRepo {
       );
       if (error) throw error;
     },
+    async saveBilling(workspaceId, memberId, paymentMethodId) {
+      const { error } = await db.from("billing_account").upsert({ workspace_id: workspaceId, member_id: memberId, payment_method_id: paymentMethodId }, { onConflict: "workspace_id" });
+      if (error) throw error;
+    },
     async sendInvite(email) {
       // Magic-link email for now; localised React Email via Resend replaces this next.
       const { error } = await db.auth.signInWithOtp({

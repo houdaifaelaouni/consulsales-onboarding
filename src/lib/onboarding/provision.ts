@@ -14,6 +14,8 @@ export interface ProvisionRepo {
   }): Promise<string>;
   addMembership(workspaceId: string, userId: string, role: "client_owner"): Promise<void>;
   addTasks(workspaceId: string, userId: string, tasks: Array<TaskTemplate & { dueAt: string }>): Promise<void>;
+  /** Remembers the buyer's saved card ids so later stages can be charged automatically. Skipped when Whop did not send them. */
+  saveBilling(workspaceId: string, memberId: string, paymentMethodId: string): Promise<void>;
   sendInvite(email: string, locale: string): Promise<void>;
 }
 
@@ -46,6 +48,7 @@ export async function provisionWorkspace(
     workspaceId, userId,
     PLANS[plan].tasks.map((t) => ({ ...t, dueAt: new Date(now.getTime() + t.dueInDays * 86_400_000).toISOString() })),
   );
+  if (p.memberId && p.paymentMethodId) await repo.saveBilling(workspaceId, p.memberId, p.paymentMethodId);
   await repo.sendInvite(p.email, locale);
   await repo.recordEvent(p.eventId, provider, "payment.succeeded");
   return { status: "created", workspaceId };

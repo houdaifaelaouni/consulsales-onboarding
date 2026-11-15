@@ -5,7 +5,7 @@ import type { NormalizedPayment } from "@/lib/payments/types";
 function memoryRepo(failOn?: "createWorkspace") {
   const state = {
     payments: new Set<string>(), events: [] as string[], workspaces: [] as Array<{ plan: string; language: string; company: string }>,
-    memberships: [] as string[], tasks: [] as string[], invites: [] as string[],
+    memberships: [] as string[], tasks: [] as string[], invites: [] as string[], billing: [] as string[],
   };
   const repo: ProvisionRepo = {
     async workspaceExistsForPayment(_p, id) { return state.payments.has(id); },
@@ -19,6 +19,7 @@ function memoryRepo(failOn?: "createWorkspace") {
     },
     async addMembership(_w, _u, role) { state.memberships.push(role); },
     async addTasks(_w, _u, t) { state.tasks.push(...t.map((x) => x.type)); },
+    async saveBilling(_w, member, method) { state.billing.push(`${member}:${method}`); },
     async sendInvite(email, locale) { state.invites.push(`${email}:${locale}`); },
   };
   return { repo, state };
@@ -69,5 +70,14 @@ describe("provisionWorkspace", () => {
     const { repo, state } = memoryRepo();
     await provisionWorkspace(repo, "whop", payment({ metadata: { plan: "starter", language: "xx" } }));
     expect(state.workspaces[0].language).toBe("en");
+  });
+
+  it("keeps the buyer's saved card ids for later charges, only when Whop sent them", async () => {
+    const a = memoryRepo();
+    await provisionWorkspace(a.repo, "whop", payment({ memberId: "mber_1", paymentMethodId: "payt_1" }));
+    expect(a.state.billing).toEqual(["mber_1:payt_1"]);
+    const b = memoryRepo();
+    await provisionWorkspace(b.repo, "whop", payment());
+    expect(b.state.billing).toEqual([]);
   });
 });
