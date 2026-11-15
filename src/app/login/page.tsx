@@ -6,18 +6,17 @@ import { FloatingField } from "@/components/auth/floating-field";
 import { PinPad } from "@/components/auth/pin-pad";
 import { Button } from "@/components/base/buttons/button";
 import { Logo } from "@/components/shell/logo";
-import { passwordProblem } from "@/lib/auth/password";
 import { cooldownLeft, looksLikeEmail } from "@/lib/auth/resend";
 import { t, type MessageKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
-/** password = email and password, link = one-time email link, signup = create an account. */
-type Mode = "password" | "link" | "signup" | "pin";
+/** password = email and password, link = one-time email link, pin = email and 6-digit PIN. Accounts are created by payment, never here. */
+type Mode = "password" | "link" | "pin";
 type State = "idle" | "sending" | "sent" | "error";
 
-const TITLE: Record<Mode, MessageKey> = { password: "login.title", link: "login.title", signup: "login.signup.title", pin: "login.title" };
-const SUBTITLE: Record<Mode, MessageKey> = { password: "login.subtitle.password", link: "login.subtitle", signup: "login.signup.subtitle", pin: "login.subtitle.pin" };
-const SUBMIT: Record<Mode, MessageKey> = { password: "login.submit.password", link: "login.submit", signup: "login.signup.submit", pin: "login.submit.password" };
+const TITLE: Record<Mode, MessageKey> = { password: "login.title", link: "login.title", pin: "login.title" };
+const SUBTITLE: Record<Mode, MessageKey> = { password: "login.subtitle.password", link: "login.subtitle", pin: "login.subtitle.pin" };
+const SUBMIT: Record<Mode, MessageKey> = { password: "login.submit.password", link: "login.submit", pin: "login.submit.password" };
 
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("password");
@@ -29,8 +28,14 @@ export default function LoginPage() {
   const [now, setNow] = useState(0);
   const [touched, setTouched] = useState(false);
   const [pin, setPin] = useState("");
+  // Opened from the "payment received" page: the person has just paid and wants their first link.
+  const [start, setStart] = useState(false);
   const emailBad = touched && !looksLikeEmail(email);
   const wait = state === "sent" ? cooldownLeft(sentAt, now) : 0;
+
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("start") === "1") { setStart(true); setMode("link"); }
+  }, []);
 
   useEffect(() => {
     if (state !== "sent" || wait === 0) return;
@@ -59,7 +64,6 @@ export default function LoginPage() {
     if (mode === "pin") return;
     setTouched(true); setProblem(null);
     if (!looksLikeEmail(email)) return;
-    if (mode === "signup") { const p = passwordProblem(password, email); if (p) { setProblem(p); return; } }
     if (mode === "password" && !password) { setProblem("login.pw.empty"); return; }
     setState("sending");
     try {
@@ -68,11 +72,6 @@ export default function LoginPage() {
       if (mode === "link") {
         const { error } = await auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: redirect, shouldCreateUser: false } });
         if (error) { setState("error"); return; }
-        done();
-      } else if (mode === "signup") {
-        // The answer is the same whether or not the address already exists, so this cannot be used to find out who has an account.
-        const { error } = await auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: redirect } });
-        if (error) { setProblem("login.error.signup"); setState("idle"); return; }
         done();
       } else {
         const { error } = await auth.signInWithPassword({ email: email.trim(), password });
@@ -96,7 +95,7 @@ export default function LoginPage() {
             <span className="grid size-12 place-items-center rounded-full bg-success-secondary text-success-primary"><CheckCircle aria-hidden className="size-6" /></span>
             <div className="flex flex-col gap-2">
               <h1 className="text-display-xs font-semibold text-primary">{t("login.sentTitle")}</h1>
-              <p className="text-md text-tertiary">{t(mode === "signup" ? "login.signup.sentBody" : "login.sentBody", "en", { email: email.trim() })}</p>
+              <p className="text-md text-tertiary">{t("login.sentBody", "en", { email: email.trim() })}</p>
             </div>
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
               <Button color="secondary" size="lg" isDisabled={wait > 0} onPress={submit}>
@@ -108,8 +107,8 @@ export default function LoginPage() {
         ) : (
           <>
             <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-display-xs font-semibold text-primary sm:text-display-sm">{t(TITLE[mode])}</h1>
-              <p className="text-md text-tertiary">{t(SUBTITLE[mode])}</p>
+              <h1 className="text-display-xs font-semibold text-primary sm:text-display-sm">{t(start && mode === "link" ? "login.start.title" : TITLE[mode])}</h1>
+              <p className="text-md text-tertiary">{t(start && mode === "link" ? "login.start.subtitle" : SUBTITLE[mode])}</p>
             </div>
             <form noValidate onSubmit={(e) => { e.preventDefault(); void submit(); }} className="flex w-full flex-col gap-4">
               <div className="flex flex-col gap-3">
@@ -125,7 +124,7 @@ export default function LoginPage() {
                 )}
                 {mode !== "link" && mode !== "pin" && (
                   <FloatingField
-                    label={t("login.password")} type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    label={t("login.password")} type="password" autoComplete="current-password"
                     value={password} onChange={(v) => { setPassword(v); setProblem(null); }} isInvalid={!!problem} describedBy="login-msg"
                   />
                 )}
@@ -133,7 +132,7 @@ export default function LoginPage() {
               <div id="login-msg" className="min-h-5" aria-live="polite">
                 {emailBad && <Msg>{t("login.invalid")}</Msg>}
                 {!emailBad && problem && <Msg>{t(problem)}</Msg>}
-                {state === "error" && <Msg>{t("login.error")}</Msg>}
+                {state === "error" && <Msg>{t(start && mode === "link" ? "login.start.error" : "login.error")}</Msg>}
               </div>
               {mode !== "pin" && <Button type="submit" size="xl" isLoading={state === "sending"} className="w-full">{t(SUBMIT[mode])}</Button>}
             </form>
@@ -142,10 +141,8 @@ export default function LoginPage() {
               {mode === "password" && <>
                 <button type="button" onClick={() => switchMode("pin")} className="font-medium text-brand-secondary hover:underline">{t("login.usePin")}</button>
                 <button type="button" onClick={() => switchMode("link")} className="text-tertiary hover:text-primary">{t("login.useLink")}</button>
-                <button type="button" onClick={() => switchMode("signup")} className="text-tertiary hover:text-primary">{t("login.toSignup")}</button>
               </>}
               {(mode === "link" || mode === "pin") && <button type="button" onClick={() => switchMode("password")} className="font-medium text-brand-secondary hover:underline">{t("login.usePassword")}</button>}
-              {mode === "signup" && <button type="button" onClick={() => switchMode("password")} className="font-medium text-brand-secondary hover:underline">{t("login.toSignin")}</button>}
             </div>
           </>
         )}
