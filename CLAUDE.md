@@ -4,6 +4,9 @@ Client onboarding portal at app.consulsales.com. Takes a client from signed cont
 LinkedIn system in 30 days. Specs: `docs/ConsulSales-Onboarding-Platform-PDR.pdf` (requirements,
 FR-xx / NFR-xx) and `docs/ConsulSales-Onboarding-Dev-Plan.pdf` (sprints S0-S7, prompts, backlog).
 
+## Start here
+Read `docs/CODEMAP.md` before searching the code. It lists where each feature lives, the database rules, and the gotchas. Update it in the same PR when structure changes.
+
 ## Product
 - 6 modules: Welcome & kickoff, Guided intake, Access & assets, Review & approve, Stage payments,
   Live dashboard (v2 only). Plus admin board and notifications.
