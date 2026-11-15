@@ -5,17 +5,10 @@
   "login.password": "Password",
   "login.show": "Show",
   "login.hide": "Hide",
-  "login.useLink": "Email me a sign-in link instead",
+  "login.useLink": "First time here, or forgot your password? Email me a sign-in link",
   "login.usePassword": "Use my password instead",
-  "login.toSignup": "New here? Create an account",
-  "login.toSignin": "Already have an account? Sign in",
-  "login.signup.title": "Create your account",
-  "login.signup.subtitle": "Use the email you will work with us from. We send a link to confirm it.",
-  "login.signup.submit": "Create account",
-  "login.signup.sentBody": "If {email} can be used, a confirmation link is on its way. It expires in 24 hours.",
   "login.error.password": "That email and password do not match. Try again, or use a sign-in link.",
   "login.error.unconfirmed": "Confirm your email first. Check your inbox for the link.",
-  "login.error.signup": "We could not create the account. Try a different password.",
   "login.pw.empty": "Enter your password.",
   "login.pw.short": "Use at least 8 characters.",
   "login.pw.same": "Do not use your email name inside your password.",
@@ -517,5 +510,8 @@
   "area.switchToClient": "Open client side",
   "nav.integrations": "Integrations",
   "nav.adminClients": "Clients",
-  "preview.note": "Preview with sample data. It will show real data once the backend is connected."
+  "preview.note": "Preview with sample data. It will show real data once the backend is connected.",
+  "login.start.title": "Payment received. Welcome!",
+  "login.start.subtitle": "Enter the email you paid with. We send you a link that starts your onboarding.",
+  "login.start.error": "We are still setting up your workspace. Wait a minute, then try again."
 }
