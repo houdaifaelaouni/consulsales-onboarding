@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { FC } from "react";
 import {
-  BarChart07, Calendar, CheckVerified02, CreditCard02, File05, Home01, Link01, LogOut01, Users01,
+  BarChart07, Calendar, CheckVerified02, CreditCard02, File05, Flag01, Home01, Link01, LogOut01, Users01,
 } from "@untitledui/icons";
 import { NavList } from "@/components/application/app-navigation/base-components/nav-list";
 import { MobileNavigationHeader } from "@/components/application/app-navigation/base-components/mobile-header";
@@ -17,7 +17,7 @@ import { activeHref, type NavIcon, type NavItem } from "@/lib/nav";
 import { Logo } from "./logo";
 
 const ICONS: Record<NavIcon, FC<{ className?: string }>> = {
-  overview: Home01, intake: File05, access: Link01, review: CheckVerified02, payments: CreditCard02, booking: Calendar, clients: Users01,
+  overview: Home01, intake: File05, access: Link01, review: CheckVerified02, payments: CreditCard02, booking: Calendar, clients: Users01, welcome: Flag01,
 };
 
 const SIDEBAR_WIDTH = 280;

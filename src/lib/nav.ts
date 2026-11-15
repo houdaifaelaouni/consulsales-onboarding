@@ -1,6 +1,6 @@
 import type { MessageKey } from "@/lib/i18n";
 
-export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients";
+export type NavIcon = "overview" | "intake" | "access" | "review" | "payments" | "booking" | "clients" | "welcome";
 export interface NavItem { href: string; label: MessageKey; icon: NavIcon }
 
 /** Demo area: every finished screen, on sample data. */
@@ -12,6 +12,7 @@ export const DEMO_NAV: NavItem[] = [
   { href: "/demo/payments", label: "nav.payments", icon: "payments" },
   { href: "/demo/booking", label: "nav.booking", icon: "booking" },
   { href: "/demo/admin", label: "nav.clients", icon: "clients" },
+  { href: "/welcome", label: "nav.welcome", icon: "welcome" },
 ];
 
 /** Client area. More links arrive as each screen gets wired to real data. */

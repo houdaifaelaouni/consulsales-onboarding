@@ -31,7 +31,7 @@ describe("activeHref", () => {
 describe("nav config", () => {
   it("has unique links, all under the right area", () => {
     expect(new Set(DEMO_NAV.map((n) => n.href)).size).toBe(DEMO_NAV.length);
-    expect(DEMO_NAV.every((n) => n.href === "/demo" || n.href.startsWith("/demo/"))).toBe(true);
+    expect(DEMO_NAV.every((n) => n.href === "/demo" || n.href.startsWith("/demo/") || n.href === "/welcome")).toBe(true);
     expect(APP_NAV.every((n) => n.href.startsWith("/app"))).toBe(true);
   });
 });
