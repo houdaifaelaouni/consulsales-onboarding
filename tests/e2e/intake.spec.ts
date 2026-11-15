@@ -1,15 +1,20 @@
 import { expect, test } from "@playwright/test";
 
+async function pick(page: import("@playwright/test").Page, label: RegExp | string, option: string) {
+  await page.getByRole("button", { name: label }).click();
+  await page.getByRole("option", { name: option }).click();
+}
+
 test("intake blocks Next until required answers, autosaves and resumes", async ({ page }) => {
   await page.goto("/demo/intake");
   await expect(page.getByRole("heading", { name: "Company" })).toBeVisible();
 
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByText(/needs an answer/).first()).toBeVisible();
 
-  await page.getByLabel("What do you sell, in one or two sentences?").fill("We run paid search for SaaS.");
-  await page.getByLabel("How big is your team?").selectOption("2 to 5");
-  await page.getByLabel("Roughly how much monthly recurring revenue do you have?").selectOption("10k to 30k");
+  await page.getByLabel(/What do you sell/).fill("We run paid search for SaaS.");
+  await pick(page, /How big is your team/, "2 to 5");
+  await pick(page, /monthly recurring revenue/, "10k to 30k");
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByRole("heading", { name: "Clients" })).toBeVisible();
   await expect(page.getByText("Saved")).toBeVisible();
@@ -21,9 +26,9 @@ test("intake blocks Next until required answers, autosaves and resumes", async (
 
 test("'not sure' satisfies a required question", async ({ page }) => {
   await page.goto("/demo/intake");
-  await page.getByLabel("What do you sell, in one or two sentences?").fill("x");
-  await page.getByLabel("How big is your team?").selectOption("Just me");
-  await page.getByLabel("Roughly how much monthly recurring revenue do you have?").selectOption("Under 10k");
+  await page.getByLabel(/What do you sell/).fill("x");
+  await pick(page, /How big is your team/, "Just me");
+  await pick(page, /monthly recurring revenue/, "Under 10k");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("checkbox", { name: "I am not sure" }).first().check();
   await page.getByRole("checkbox", { name: "I am not sure" }).nth(1).check();

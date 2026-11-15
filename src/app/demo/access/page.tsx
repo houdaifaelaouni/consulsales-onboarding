@@ -12,8 +12,6 @@ const initial: AccessStates = {
 
 export default function DemoAccess() {
   return (
-    <main className="mx-auto max-w-xl px-4 py-8 sm:py-12">
-      <AccessBoard initial={initial} />
-    </main>
+    <AccessBoard initial={initial} />
   );
 }

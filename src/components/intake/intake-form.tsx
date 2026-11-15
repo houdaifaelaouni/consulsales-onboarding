@@ -1,13 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge, Button, Card, Input, Select, Skeleton, Textarea } from "@/components/ui";
-import { cn } from "@/lib/cn";
+import { CheckCircle } from "@untitledui/icons";
+import { Button } from "@/components/base/buttons/button";
+import { Checkbox } from "@/components/base/checkbox/checkbox";
+import { Input } from "@/components/base/input/input";
+import { ProgressBarBase } from "@/components/base/progress-indicators/progress-indicators";
+import { Select } from "@/components/base/select/select";
+import { TextArea } from "@/components/base/textarea/textarea";
 import { t } from "@/lib/i18n";
-import {
-  answeredCount, firstIncompleteStep, isComplete, minutesLeft, missingRequired, questionsForStep, type Answers,
-} from "@/lib/intake/logic";
+import { answeredCount, firstIncompleteStep, isComplete, minutesLeft, missingRequired, questionsForStep, type Answers } from "@/lib/intake/logic";
 import { STEPS, type Question } from "@/lib/intake/questions";
+import { cx } from "@/utils/cx";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -50,7 +54,7 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
     try { await store.save(latest.current); setSave("saved"); } catch { dirty.current = true; setSave("error"); }
   }, [store]);
 
-  // Debounced autosave every 3 s after the last change; also on tab hide so nothing is lost (FR-05).
+  // Debounced autosave 3 s after the last change; also when the tab is hidden so nothing is lost (FR-05).
   useEffect(() => {
     if (!dirty.current) return;
     const id = setTimeout(flush, AUTOSAVE_MS);
@@ -75,8 +79,8 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
 
   if (!ready) {
     return (
-      <div className="space-y-4" role="status" aria-label={t("intake.loading")}>
-        <Skeleton className="h-4 w-40" /><Skeleton className="h-8 w-2/3" /><Skeleton className="h-28 w-full" /><Skeleton className="h-12 w-full" />
+      <div className="flex flex-col gap-4" role="status" aria-label={t("intake.loading")}>
+        {["h-4 w-40", "h-8 w-2/3", "h-28 w-full", "h-12 w-full"].map((c) => <div key={c} className={cx("animate-pulse rounded-md bg-quaternary", c)} />)}
       </div>
     );
   }
@@ -92,7 +96,7 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
     if (delta === 1 && missing.length > 0) {
       setShowMissing(true);
       // Take the person to the first unanswered question so they do not have to hunt for it.
-      document.getElementById(`q-${missing[0].key}`)?.focus();
+      document.querySelector<HTMLElement>(`[data-q="${missing[0].key}"] input:not([type=checkbox]), [data-q="${missing[0].key}"] textarea, [data-q="${missing[0].key}"] button`)?.focus();
       return;
     }
     setShowMissing(false);
@@ -104,20 +108,21 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
 
   if (finished) {
     return (
-      <Card className="space-y-4 text-center" role="status">
-        <h2 className="text-[22px] font-medium tracking-[-0.4px]">{t("intake.done.title")}</h2>
-        <p className="text-ink-muted">{t("intake.done.body")}</p>
-        <div><Button variant="secondary" onClick={() => { setFinished(false); setStep(1); }}>{t("intake.done.review")}</Button></div>
-      </Card>
+      <div className="flex flex-col items-center gap-4 rounded-xl bg-primary p-8 text-center shadow-xs ring-1 ring-secondary" role="status">
+        <span className="grid size-12 place-items-center rounded-full bg-success-secondary text-fg-success-primary"><CheckCircle aria-hidden className="size-6" /></span>
+        <h2 className="text-display-xs font-semibold text-primary">{t("intake.done.title")}</h2>
+        <p className="text-md text-tertiary">{t("intake.done.body")}</p>
+        <Button color="secondary" onPress={() => { setFinished(false); setStep(1); }}>{t("intake.done.review")}</Button>
+      </div>
     );
   }
 
   const missingKeys = new Set(showMissing ? missingRequired(step, answers).map((q) => q.key) : []);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3 text-[13px] font-medium tracking-[0.4px] text-ink-subtle uppercase">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 text-sm font-medium text-tertiary">
           <span>{t("intake.step", "en", { n: step, total: STEPS.length })}</span>
           <span aria-live="polite">{mins === 0 ? t("intake.allSet") : t("intake.timeLeft", "en", { min: mins })}</span>
         </div>
@@ -126,39 +131,37 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
             <li key={s.id} aria-current={s.id === step ? "step" : undefined}>
               <button
                 type="button" onClick={() => setStep(s.id)}
-                className={cn("w-full rounded-md border px-2 py-1.5 text-left text-xs transition-colors",
-                  s.id === step ? "border-accent text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}
+                className={cx("min-h-10 w-full rounded-lg px-2 text-left text-sm ring-1 ring-inset transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
+                  s.id === step ? "bg-secondary font-medium text-primary ring-brand" : "text-tertiary ring-secondary hover:bg-primary_hover")}
               >
                 {s.title}
               </button>
             </li>
           ))}
         </ol>
-        <div className="h-1 overflow-hidden rounded-full bg-surface-3" aria-hidden>
-          <div className="h-full bg-ink-subtle transition-[width]" style={{ width: `${(done / total) * 100}%` }} />
-        </div>
+        <ProgressBarBase value={done} max={total} aria-hidden />
       </div>
 
-      <div className="space-y-1">
-        <h2 className="text-[28px] leading-tight font-semibold tracking-[-0.6px]">{current.title}</h2>
-        <p className="text-ink-muted">{current.intro}</p>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-display-sm font-semibold text-primary">{current.title}</h2>
+        <p className="text-md text-tertiary">{current.intro}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="flex flex-col gap-8">
         {qs.map((q) => (
           <Field key={q.key} q={q} answer={answers[q.key]} invalid={missingKeys.has(q.key)} onChange={(p) => update(q.key, p)} />
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-hairline pt-4">
-        <span className="text-sm text-ink-subtle" role="status" aria-live="polite">
+      <div className="flex items-center justify-between gap-3 border-t border-secondary pt-5">
+        <span className="text-sm text-tertiary" role="status" aria-live="polite">
           {save === "saving" && t("intake.saving")}
           {save === "saved" && t("intake.saved")}
           {save === "error" && t("intake.saveError")}
         </span>
         <div className="flex gap-3">
-          {step > 1 && <Button variant="secondary" onClick={() => go(-1)}>{t("intake.back")}</Button>}
-          <Button onClick={() => go(1)}>{last ? t("intake.finish") : t("intake.next")}</Button>
+          {step > 1 && <Button color="secondary" onPress={() => go(-1)}>{t("intake.back")}</Button>}
+          <Button size="lg" onPress={() => go(1)}>{last ? t("intake.finish") : t("intake.next")}</Button>
         </div>
       </div>
     </div>
@@ -168,40 +171,33 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
 function Field({ q, answer, invalid, onChange }: {
   q: Question; answer: Answers[string]; invalid: boolean; onChange: (p: { value?: string; notSure?: boolean; note?: string }) => void;
 }) {
-  const id = `q-${q.key}`;
   const notSure = answer?.notSure === true;
-  const common = {
-    id, disabled: notSure, value: answer?.value ?? "",
-    "aria-invalid": invalid || undefined, "aria-describedby": `${id}-help`, "aria-required": q.required || undefined,
-  } as const;
+  const value = answer?.value ?? "";
+  const hint = invalid ? t("intake.fieldRequired") : undefined;
+  const common = { label: q.label, isDisabled: notSure, isInvalid: invalid, isRequired: q.required, hint } as const;
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-3">
-        <label htmlFor={id} className="text-base font-medium">{q.label}</label>
-        <Badge className="shrink-0">{q.required ? t("intake.required") : t("intake.optional")}</Badge>
-      </div>
-      <div id={`${id}-help`} className="space-y-1 text-sm text-ink-subtle">
+    <div data-q={q.key} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5 text-sm text-tertiary">
+        {!q.required && <p className="font-medium text-quaternary">{t("intake.optional")}</p>}
         {q.help && <p>{q.help}</p>}
         {q.example && <p>{t("intake.example", "en", { text: q.example })}</p>}
       </div>
-      {q.type === "textarea" && <Textarea {...common} onChange={(e) => onChange({ value: e.target.value })} />}
-      {q.type === "text" && <Input {...common} type="text" onChange={(e) => onChange({ value: e.target.value })} />}
-      {q.type === "number" && <Input {...common} type="number" inputMode="numeric" min={0} onChange={(e) => onChange({ value: e.target.value })} />}
+      {q.type === "textarea" && <TextArea {...common} rows={4} value={value} onChange={(v) => onChange({ value: v })} />}
+      {q.type === "text" && <Input {...common} type="text" value={value} onChange={(v) => onChange({ value: v })} />}
+      {q.type === "number" && <Input {...common} type="number" inputMode="numeric" value={value} onChange={(v) => onChange({ value: v })} />}
       {q.type === "select" && (
-        <Select {...common} onChange={(e) => onChange({ value: e.target.value })}>
-          <option value="">{t("intake.select")}</option>
-          {q.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+        <Select
+          {...common} placeholder={t("intake.select")} selectedKey={value || null}
+          items={(q.options ?? []).map((o) => ({ id: o, label: o }))} onSelectionChange={(k) => onChange({ value: k === null ? "" : String(k) })}
+        >
+          {(item) => <Select.Item id={item.id} label={item.label} />}
         </Select>
       )}
-      {invalid && <p role="alert" className="border-l-2 border-ink pl-3 text-sm text-ink">{t("intake.fieldRequired")}</p>}
-      <label className="flex min-h-10 items-center gap-2 text-sm text-ink-muted">
-        <input type="checkbox" checked={notSure} onChange={(e) => onChange({ notSure: e.target.checked })} className="size-4 accent-[var(--primary)]" />
-        {t("intake.notSure")}
-      </label>
+      <Checkbox isSelected={notSure} onChange={(v) => onChange({ notSure: v })} label={t("intake.notSure")} />
       {notSure && (
-        <Input type="text" aria-label={t("intake.notePlaceholder")} placeholder={t("intake.notePlaceholder")} value={answer?.note ?? ""} onChange={(e) => onChange({ note: e.target.value })} />
+        <Input aria-label={t("intake.notePlaceholder")} placeholder={t("intake.notePlaceholder")} value={answer?.note ?? ""} onChange={(v) => onChange({ note: v })} />
       )}
     </div>
   );
 }
-
