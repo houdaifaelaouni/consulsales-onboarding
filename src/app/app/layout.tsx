@@ -25,21 +25,31 @@ export default async function ClientLayout({ children }: { children: React.React
   const { data: m } = await supabase.from("membership").select("workspace_id").eq("user_id", viewer.id).eq("role", "client_owner").limit(1);
   const workspaceId = m?.[0]?.workspace_id as string | undefined;
   if (workspaceId && !isStaff(viewer)) {
-    const { data: inv } = await supabase.from("invoice").select("stage,paid_at,pay_url").eq("workspace_id", workspaceId);
+    const { data: inv } = await supabase.from("invoice").select("stage,paid_at,pay_url,provider_invoice_id").eq("workspace_id", workspaceId);
     if (!hasPaidEntry(inv)) {
-      let payUrl = (inv?.find((r) => r.stage === 1)?.pay_url as string | null | undefined) ?? null;
-      const { data: ws } = await supabase.from("workspace").select("plan").eq("id", workspaceId).single();
+      const entry = inv?.find((r) => r.stage === 1);
+      let payUrl = (entry?.pay_url as string | null | undefined) ?? null;
+      let checkoutId = (entry?.provider_invoice_id as string | null | undefined) ?? null;
+      const { data: ws } = await supabase.from("workspace").select("plan,company").eq("id", workspaceId).single();
       const plan: PlanKey = isPlanKey(ws?.plan) ? ws.plan : "starter";
       if (!payUrl) {
         try {
           const db = createAdminClient();
           await ensureEntryInvoice(db, workspaceId);
           await ensureStageLinks({ db, provider: getPaymentProvider(), workspaceId, plan, appUrl: appUrl() });
-          const { data: again } = await supabase.from("invoice").select("pay_url").eq("workspace_id", workspaceId).eq("stage", 1).maybeSingle();
+          const { data: again } = await supabase.from("invoice").select("pay_url,provider_invoice_id").eq("workspace_id", workspaceId).eq("stage", 1).maybeSingle();
           payUrl = (again?.pay_url as string | null | undefined) ?? null;
+          checkoutId = (again?.provider_invoice_id as string | null | undefined) ?? null;
         } catch { /* Whop or the server key is not set up yet: the screen says so */ }
       }
-      return <PayToEnter amount={`€${PLANS[plan].stagePrices[0]}`} payUrl={payUrl} />;
+      const cfg = PLANS[plan];
+      return (
+        <PayToEnter
+          amount={`€${cfg.stagePrices[0]}`} nextAmount={`€${cfg.stagePrices[1]}`} planTitle={cfg.title}
+          holder={viewer.name || firstName(viewer.name, viewer.email)} company={(ws?.company as string | undefined) ?? ""} email={viewer.email}
+          checkoutId={checkoutId} payUrl={payUrl}
+        />
+      );
     }
   }
 

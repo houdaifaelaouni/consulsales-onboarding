@@ -538,5 +538,18 @@
   "entry.confirming": "Already paid? It can take a minute to show up.",
   "entry.refresh": "Check again",
   "entry.unavailable": "Payments are not switched on yet. Please contact us and we will send your payment link.",
-  "delivery.unpaid": "The client has not paid this stage yet, so it cannot be sent. No payment, no delivery."
+  "delivery.unpaid": "The client has not paid this stage yet, so it cannot be sent. No payment, no delivery.",
+  "entry.eyebrow": "Step 1 of 3 · Foundation",
+  "entry.checkout": "Payment",
+  "entry.secure": "Secured by Whop",
+  "entry.loading": "Loading the secure checkout…",
+  "entry.openPage": "Open checkout in a new page",
+  "entry.paid.title": "Payment received",
+  "entry.paid.body": "Opening your workspace. This takes a few seconds.",
+  "entry.point.1": "Your workspace, kickoff call and guided intake",
+  "entry.point.2": "We research your market and write your ideal client profile",
+  "entry.point.3": "Next payment ({next}) only when you approve your ideal client profile",
+  "entry.card.holder": "Client",
+  "entry.card.stage": "Stage 1",
+  "entry.card.caption": "Foundation for {company}. Your card details are entered only in the secure checkout."
 }

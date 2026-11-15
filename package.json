@@ -20,6 +20,7 @@
     "@tailwindcss/typography": "^0.5.20",
     "@untitledui/file-icons": "^0.0.9",
     "@untitledui/icons": "^0.0.23",
+    "@whop/checkout": "0.7.0",
     "@whop/sdk": "^2.8.1",
     "motion": "^14.14.0",
     "next": "15.5.29",
