@@ -15,9 +15,9 @@ import { cx } from "@/utils/cx";
 interface PickedFile { id: string; name: string; size: number; type: string; url: string | null }
 const STATUS_COLOR = { connected: "success", pending: "gray", blocked: "error" } as const;
 
-export function AccessBoard({ initial, onChange }: { initial: AccessStates; onChange?: (id: string, state: NonNullable<AccessStates[string]>) => void }) {
+export function AccessBoard({ initial, onChange, items = ACCESS_ITEMS }: { initial: AccessStates; onChange?: (id: string, state: NonNullable<AccessStates[string]>) => void; items?: AccessItem[] }) {
   const [states, setStates] = useState<AccessStates>(initial);
-  const { done, total } = connectedCount(states, ACCESS_ITEMS.map((i) => i.id));
+  const { done, total } = connectedCount(states, items.map((i) => i.id));
   const set = (id: string, patch: AccessStates[string]) => {
     setStates((s) => ({ ...s, [id]: patch }));
     if (patch) onChange?.(id, patch);
@@ -38,7 +38,7 @@ export function AccessBoard({ initial, onChange }: { initial: AccessStates; onCh
       </p>
 
       <ul className="flex flex-col gap-4">
-        {ACCESS_ITEMS.map((item) => (
+        {items.map((item) => (
           <li key={item.id}><ItemCard item={item} state={states[item.id]} onChange={(p) => set(item.id, p)} /></li>
         ))}
       </ul>
@@ -80,7 +80,9 @@ function ItemCard({ item, state, onChange }: { item: AccessItem } & ActionProps)
         <>
           {item.kind === "oauth" && <OAuthAction item={item} state={state} onChange={onChange} />}
           {item.kind === "vault" && <VaultAction state={state} onChange={onChange} />}
-          {item.kind === "link" && <LinkAction state={state} onChange={onChange} />}
+          {item.kind === "link" && <LinkAction item={item} state={state} onChange={onChange} />}
+          {item.kind === "confirm" && <ConfirmAction state={state} onChange={onChange} />}
+          {item.kind === "choice" && <ChoiceAction item={item} state={state} onChange={onChange} />}
           {item.kind === "files" && <FilesAction onChange={onChange} />}
           {status !== "connected" && (
             <div><Button color="link-gray" size="sm" onPress={() => onChange({ status: "blocked", blockedSince: new Date().toISOString() })}>{t("access.reportProblem")}</Button></div>
@@ -118,7 +120,7 @@ function VaultAction({ state, onChange }: ActionProps) {
   );
 }
 
-function LinkAction({ state, onChange }: ActionProps) {
+function LinkAction({ item, state, onChange }: ActionProps & { item: AccessItem }) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
   if (state?.status === "connected") return <Connected>{state.detail}</Connected>;
@@ -129,11 +131,34 @@ function LinkAction({ state, onChange }: ActionProps) {
       onChange({ status: "connected", detail: value.trim() });
     }}>
       <Input
-        label={t("access.linkLabel")} type="url" inputMode="url" placeholder="https://cal.com/you/30min" value={value}
+        label={item.linkLabel ?? t("access.linkLabel")} type="url" inputMode="url" placeholder={item.linkPlaceholder ?? "https://cal.com/you/30min"} value={value}
         isInvalid={invalid} hint={invalid ? t("access.linkInvalid") : undefined} onChange={(v) => { setValue(v); setInvalid(false); }}
       />
       <div><Button type="submit">{t("access.save")}</Button></div>
     </form>
+  );
+}
+
+/** The client says they did the steps. We cannot see LinkedIn, so it stays "To do" until our team confirms. */
+function ConfirmAction({ state, onChange }: ActionProps) {
+  if (state?.status === "connected") return <Connected>{t("access.confirmed")}</Connected>;
+  if (state?.detail === "reported") return <p className="text-sm text-secondary" role="status">{t("access.reported")}</p>;
+  return <div><Button onPress={() => onChange({ status: "pending", detail: "reported" })}>{t("access.iDidThis")}</Button></div>;
+}
+
+/** The client tells us which tool they use. Connecting happens together on the kickoff call. */
+function ChoiceAction({ item, state, onChange }: ActionProps & { item: AccessItem }) {
+  if (state?.status === "connected") return <Connected>{state.detail}</Connected>;
+  if (state?.detail) return (
+    <div className="flex flex-col gap-2" role="status">
+      <p className="text-sm text-secondary">{t("access.chosen", "en", { choice: state.detail })}</p>
+      <div><Button color="link-gray" size="sm" onPress={() => onChange({ status: "pending" })}>{t("access.change")}</Button></div>
+    </div>
+  );
+  return (
+    <div className="flex flex-wrap gap-3">
+      {item.providers?.map((p) => <Button key={p} color="secondary" onPress={() => onChange({ status: "pending", detail: p })}>{p}</Button>)}
+    </div>
   );
 }
 
