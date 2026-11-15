@@ -59,5 +59,6 @@
   "intake.done.title": "Intake complete",
   "intake.done.body": "Thank you. Your delivery lead has everything needed for kickoff.",
   "intake.done.review": "Review my answers",
-  "intake.loading": "Loading your answers"
+  "intake.loading": "Loading your answers",
+  "intake.fieldRequired": "This question needs an answer, or tick “I am not sure”."
 }

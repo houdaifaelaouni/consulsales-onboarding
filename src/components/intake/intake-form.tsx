@@ -88,7 +88,13 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
   const { done, total } = answeredCount(answers);
 
   async function go(delta: 1 | -1) {
-    if (delta === 1 && missingRequired(step, answers).length > 0) { setShowMissing(true); return; }
+    const missing = missingRequired(step, answers);
+    if (delta === 1 && missing.length > 0) {
+      setShowMissing(true);
+      // Take the person to the first unanswered question so they do not have to hunt for it.
+      document.getElementById(`q-${missing[0].key}`)?.focus();
+      return;
+    }
     setShowMissing(false);
     await flush();
     if (delta === 1 && last) { setFinished(true); return; }
@@ -144,8 +150,6 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
         ))}
       </div>
 
-      {showMissing && missingKeys.size > 0 && <p role="alert" className="text-sm text-ink-muted">{t("intake.missing")}</p>}
-
       <div className="flex items-center justify-between gap-3 border-t border-hairline pt-4">
         <span className="text-sm text-ink-subtle" role="status" aria-live="polite">
           {save === "saving" && t("intake.saving")}
@@ -189,6 +193,7 @@ function Field({ q, answer, invalid, onChange }: {
           {q.options?.map((o) => <option key={o} value={o}>{o}</option>)}
         </Select>
       )}
+      {invalid && <p role="alert" className="border-l-2 border-ink pl-3 text-sm text-ink">{t("intake.fieldRequired")}</p>}
       <label className="flex min-h-10 items-center gap-2 text-sm text-ink-muted">
         <input type="checkbox" checked={notSure} onChange={(e) => onChange({ notSure: e.target.checked })} className="size-4 accent-[var(--primary)]" />
         {t("intake.notSure")}
