@@ -8,6 +8,8 @@ export interface HandleDeps {
   stageRepo: StageRepo;
   /** Creates the workspace for a first payment. Resolves to its status. */
   provision: (payment: NormalizedPayment) => Promise<{ status: string }>;
+  /** Remembers the buyer's card (server only) so later stages can be charged. Optional. */
+  saveCard?: (workspaceId: string, memberId: string, paymentMethodId: string) => Promise<void>;
 }
 
 export interface HandleResult { status: number; body: Record<string, unknown> }
@@ -30,6 +32,7 @@ export async function handlePayment(deps: HandleDeps, payment: NormalizedPayment
 
   if (kind.type === "stage") {
     const r = await settleStage(deps.stageRepo, payment, kind.workspaceId, kind.stage);
+    if (r === "paid" && kind.stage === 1 && payment.memberId && payment.paymentMethodId) await deps.saveCard?.(kind.workspaceId, payment.memberId, payment.paymentMethodId);
     return r === "rejected" ? { status: 422, body: { error: "stage payment rejected" } } : { status: 200, body: { ok: true, result: r } };
   }
 

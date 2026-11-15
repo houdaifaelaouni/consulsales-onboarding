@@ -33,11 +33,11 @@ export function DeliveryPanel({ workspaceId, items, changeNotes }: { workspaceId
 
 function Item({ d, note, onDone }: { d: Deliverable; note?: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<"ok" | "err" | null>(null);
+  const [msg, setMsg] = useState<"ok" | "err" | "unpaid" | null>(null);
   async function send() {
     setBusy(true); setMsg(null);
     const res = await sendForReview(d.id);
-    setBusy(false); setMsg(res.ok ? "ok" : "err"); if (res.ok) onDone();
+    setBusy(false); setMsg(res.ok ? "ok" : res.reason === "unpaid" ? "unpaid" : "err"); if (res.ok) onDone();
   }
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-secondary p-4 ring-1 ring-secondary">
@@ -50,6 +50,7 @@ function Item({ d, note, onDone }: { d: Deliverable; note?: string; onDone: () =
       {d.status === "in_review" && <p className="text-sm text-tertiary">{t("delivery.sentNote")}</p>}
       {canAddVersion(d.status) && <Editor workspaceId={null} deliverable={d} onDone={onDone} />}
       {canSend(d.status, d.versions.length) && <div><Button size="sm" isLoading={busy} onPress={send}>{t("delivery.send")}</Button></div>}
+      {msg === "unpaid" && <p role="alert" className="text-sm text-error-primary">{t("delivery.unpaid")}</p>}
       {msg === "err" && <p role="alert" className="text-sm text-error-primary">{t("delivery.error")}</p>}
     </div>
   );

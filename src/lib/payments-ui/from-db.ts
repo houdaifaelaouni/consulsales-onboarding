@@ -3,11 +3,11 @@ import type { StageInvoice } from "./types";
 
 export interface InvoiceRow { stage: number; amount_cents: number | null; currency: string; created_at: string; paid_at: string | null; pay_url: string | null; pdf_url: string | null; charge_attempted_at?: string | null; charge_error?: string | null }
 
-/** What each stage is and what unlocks it: charged once the client can see the work it covers. */
+/** What each stage is and what unlocks it: paid before the work on that stage starts. */
 const STAGES: Array<Pick<StageInvoice, "stage" | "title" | "unlockedBy" | "unlocks">> = [
-  { stage: 1, title: "Foundation", unlockedBy: "You paid at checkout", unlocks: "Your workspace and kickoff" },
-  { stage: 2, title: "Build", unlockedBy: "Your new LinkedIn profile is ready for you to see", unlocks: "The next step: your DM sequences" },
-  { stage: 3, title: "Launch", unlockedBy: "Your DM sequences are ready for you to see", unlocks: "Go-live, content engine and weekly reports" },
+  { stage: 1, title: "Foundation", unlockedBy: "You pay to open your workspace", unlocks: "Your workspace, kickoff and your ideal client profile" },
+  { stage: 2, title: "Build", unlockedBy: "You approve your ideal client profile", unlocks: "We write your new LinkedIn profile" },
+  { stage: 3, title: "Launch", unlockedBy: "You approve your LinkedIn profile", unlocks: "We write your DM sequences, then go-live" },
 ];
 
 /**

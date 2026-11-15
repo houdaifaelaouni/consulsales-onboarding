@@ -3,7 +3,7 @@ begin;
 insert into auth.users (id, email, instance_id, aud, role) values
   ('00000000-0000-0000-0000-0000000000a6','a6@test.dev','00000000-0000-0000-0000-000000000000','authenticated','authenticated'),
   ('00000000-0000-0000-0000-0000000000d6','lead6@test.dev','00000000-0000-0000-0000-000000000000','authenticated','authenticated');
-insert into public.workspace (id, company, plan) values ('60000000-0000-0000-0000-00000000000a','Agency A6','pro');
+insert into public.workspace (id, company, plan, payment_provider, payment_id) values ('60000000-0000-0000-0000-00000000000a','Agency A6','pro','whop','pay_test_a6');
 insert into public.membership values
   ('60000000-0000-0000-0000-00000000000a','00000000-0000-0000-0000-0000000000a6','client_owner'),
   ('60000000-0000-0000-0000-00000000000a','00000000-0000-0000-0000-0000000000d6','delivery_lead');

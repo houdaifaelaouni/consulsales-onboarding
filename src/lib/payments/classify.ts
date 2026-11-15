@@ -3,7 +3,7 @@ import type { NormalizedPayment } from "./types";
 
 export type PaymentKind =
   | { type: "signup"; plan: PlanKey }
-  | { type: "stage"; workspaceId: string; stage: 2 | 3 }
+  | { type: "stage"; workspaceId: string; stage: 1 | 2 | 3 }
   | { type: "unknown"; reason: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,7 +25,7 @@ export function planFromWhopId(planId: string | undefined, env: Env): PlanKey | 
 export function classifyPayment(p: NormalizedPayment, env: Env): PaymentKind {
   if (p.metadata.kind === "stage") {
     const stage = Number(p.metadata.stage);
-    if (!UUID.test(p.metadata.workspace_id ?? "") || (stage !== 2 && stage !== 3)) return { type: "unknown", reason: "bad stage metadata" };
+    if (!UUID.test(p.metadata.workspace_id ?? "") || (stage !== 1 && stage !== 2 && stage !== 3)) return { type: "unknown", reason: "bad stage metadata" };
     return { type: "stage", workspaceId: p.metadata.workspace_id, stage };
   }
   const mapped = planFromWhopId(p.planId, env);

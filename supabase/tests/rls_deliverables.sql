@@ -6,9 +6,9 @@ insert into auth.users (id, email, instance_id, aud, role) values
   ('00000000-0000-0000-0000-0000000000d4','lead4@test.dev','00000000-0000-0000-0000-000000000000','authenticated','authenticated'),
   ('00000000-0000-0000-0000-0000000000c4','admin4@test.dev','00000000-0000-0000-0000-000000000000','authenticated','authenticated');
 update public.app_user set is_admin = true where id = '00000000-0000-0000-0000-0000000000c4';
-insert into public.workspace (id, company, plan) values
-  ('40000000-0000-0000-0000-00000000000a','Agency A4','starter'),
-  ('40000000-0000-0000-0000-00000000000b','Agency B4','pro');
+insert into public.workspace (id, company, plan, payment_provider, payment_id) values
+  ('40000000-0000-0000-0000-00000000000a','Agency A4','starter','whop','pay_test_a4'),
+  ('40000000-0000-0000-0000-00000000000b','Agency B4','pro','whop','pay_test_b4');
 insert into public.membership values
   ('40000000-0000-0000-0000-00000000000a','00000000-0000-0000-0000-0000000000a4','client_owner'),
   ('40000000-0000-0000-0000-00000000000b','00000000-0000-0000-0000-0000000000b4','client_owner'),
