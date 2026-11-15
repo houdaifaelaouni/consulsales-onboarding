@@ -16,9 +16,9 @@ export function LayerStack({ completed, locale = "en" }: { completed: number; lo
         const right = `M140 ${y} L80 ${y + 18} L80 ${y + 26} L140 ${y + 8} Z`;
         return (
           <g key={i} strokeWidth="1" strokeLinejoin="round" className="stroke-hairline-strong">
-            <path d={left} className={lit ? "fill-primary-focus" : "fill-surface-2"} />
-            <path d={right} className={lit ? "fill-primary" : "fill-surface-1"} />
-            <path d={top} className={lit ? "fill-primary-hover" : "fill-surface-3"} />
+            <path d={left} className={lit ? "fill-accent-focus" : "fill-surface-2"} />
+            <path d={right} className={lit ? "fill-accent" : "fill-surface-1"} />
+            <path d={top} className={lit ? "fill-accent-hover" : "fill-surface-3"} />
           </g>
         );
       })}

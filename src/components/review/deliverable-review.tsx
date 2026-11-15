@@ -79,7 +79,7 @@ export function DeliverableReview({ deliverable, role = "client_owner" }: { deli
       <div role="tablist" aria-label={deliverable.title} className="grid grid-cols-3 gap-2">
         {(["review", "versions", "preview"] as const).map((k) => (
           <button key={k} role="tab" aria-selected={tab === k} id={`tab-${k}`} aria-controls={`panel-${k}`} onClick={() => setTab(k)}
-            className={cn("min-h-10 rounded-md border px-2 text-sm transition-colors", tab === k ? "border-primary text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}>
+            className={cn("min-h-10 rounded-md border px-2 text-sm transition-colors", tab === k ? "border-accent text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}>
             {t(`review.tab.${k}` as "review.tab.review")}
           </button>
         ))}
@@ -133,7 +133,7 @@ export function DeliverableReview({ deliverable, role = "client_owner" }: { deli
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-canvas/95 px-4 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-canvas/95 px-4 py-3 backdrop-blur lg:left-[280px]">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           {status === "approved" && approved ? (
             <p className="text-sm text-ink-muted" role="status">{t("review.approvedBy", "en", { name: approved.by, date: fmt(approved.at) })}</p>
@@ -190,7 +190,7 @@ function ThreadCard({ th, orphaned, active, locked, onActivate, onResolve, onRep
 }) {
   const [reply, setReply] = useState("");
   return (
-    <Card id={`thread-${th.id}`} className={cn("space-y-3 p-4", th.resolved && "opacity-70", active && "border-primary")} onClick={onActivate}>
+    <Card id={`thread-${th.id}`} className={cn("space-y-3 p-4", th.resolved && "opacity-70", active && "border-accent")} onClick={onActivate}>
       <p className="border-l-2 border-hairline-strong pl-3 text-sm text-ink-subtle">“{th.anchor.quote}”</p>
       {orphaned && <p className="text-sm text-ink">{t("review.orphaned")}</p>}
       <div><p className="text-sm font-medium">{th.author}</p><p className="text-ink-muted">{th.body}</p></div>

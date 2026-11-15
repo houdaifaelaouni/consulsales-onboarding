@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 type Variant = "primary" | "secondary" | "ghost";
 const variants: Record<Variant, string> = {
   // Accent lives on the primary CTA and the focus ring only.
-  primary: "bg-primary text-white hover:bg-primary-hover active:bg-primary-focus",
+  primary: "bg-accent text-white hover:bg-accent-hover active:bg-accent-focus",
   secondary: "bg-surface-1 text-ink border border-hairline hover:bg-surface-2",
   ghost: "bg-transparent text-ink hover:bg-surface-1",
 };

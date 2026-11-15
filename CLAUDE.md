@@ -22,7 +22,21 @@ say Stripe (checkout, invoices, SEPA, Tax, subscriptions, webhooks, FR-20..FR-23
 Whop instead. Keep payment code behind a `src/lib/payments/` interface so the provider stays
 swappable. Verify Whop webhook signatures and make handlers idempotent.
 
-## Design tokens (Linear-style, dark only)
+## UI library and layout (founder decision, Nov 2026: supersedes the Linear-style kit below)
+- **Dashboard layout** (sidebar on large screens, slide-in menu on phones) via `src/components/shell/dashboard-shell.tsx`.
+- **Untitled UI React** is the component library. Its components are copied into the repo (we own the source) under
+  `src/components/base`, `application`, `foundations`, `shared-assets`, plus `src/utils/cx.ts` and `src/hooks`. Add more with
+  `npx untitledui@latest add <name>`; they come from the starter kit.
+- **Licence rule (public repo!):** use only the free, open-source (MIT) Untitled UI components. Never add PRO components or
+  PRO page templates to this repo. Keep `THIRD_PARTY_LICENSES/untitled-ui-MIT.txt`. Do not ship Untitled UI's own logo.
+- **Theme:** dark by default (`dark-mode` class via next-themes). Brand colour is the ConsulSales lavender `#5e6ad2`
+  (`--color-brand-*` in `src/styles/theme.css`). In new code use Untitled UI semantic tokens (`bg-primary`, `text-secondary`,
+  `border-secondary`, `bg-brand-solid`, ...), not the legacy ones.
+- **Legacy** (`components/ui`, `ink`/`surface`/`hairline`/`accent` tokens) is temporary. Migrate a screen to Untitled UI, then delete
+  what it no longer uses. Remove the legacy block in `src/styles/globals.css` when nothing references it.
+- ESLint ignores the vendored Untitled UI folders on purpose.
+
+## Design tokens (legacy Linear-style, being replaced)
 - canvas `#010102`; surfaces `#0f1011` / `#141516` / `#18191a`
 - hairline `#23252a`, hairline-strong `#34343a`
 - ink `#f7f8f8`, ink-muted `#d0d6e0`, ink-subtle `#8a8f98`
