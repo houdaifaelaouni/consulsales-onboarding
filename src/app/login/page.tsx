@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Logo } from "@/components/shell/logo";
 import { createClient } from "@/lib/supabase/client";
 import { t } from "@/lib/i18n";
 
@@ -20,6 +21,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-4">
+      <Logo />
       <div className="space-y-2">
         <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.6px]">{t("login.title")}</h1>
         <p className="text-ink-muted">{t("login.subtitle")}</p>
@@ -35,7 +37,7 @@ export default function LoginPage() {
         />
         <button
           type="submit" disabled={state === "sending"}
-          className="w-full rounded-md bg-primary px-3.5 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+          className="w-full rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
         >
           {t("login.submit")}
         </button>

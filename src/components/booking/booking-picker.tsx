@@ -85,7 +85,7 @@ export function BookingPicker({ plan, now, booked, store, fallbackUrl }: {
         <div className="flex flex-wrap gap-2">
           {days.map((d) => (
             <button key={d.key} type="button" aria-pressed={d.key === day.key} onClick={() => { setDayKey(d.key); setSlot(null); }}
-              className={cn("min-h-10 rounded-md border px-3 text-sm transition-colors", d.key === day.key ? "border-primary text-ink" : "border-hairline text-ink-muted hover:bg-surface-1")}>
+              className={cn("min-h-10 rounded-md border px-3 text-sm transition-colors", d.key === day.key ? "border-accent text-ink" : "border-hairline text-ink-muted hover:bg-surface-1")}>
               {d.label}
             </button>
           ))}
@@ -97,7 +97,7 @@ export function BookingPicker({ plan, now, booked, store, fallbackUrl }: {
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {day.slots.map((s) => (
             <button key={s.iso} type="button" aria-pressed={slot === s.iso} onClick={() => setSlot(s.iso)}
-              className={cn("min-h-11 rounded-md border text-sm transition-colors", slot === s.iso ? "border-primary text-ink" : "border-hairline text-ink-muted hover:bg-surface-1")}>
+              className={cn("min-h-11 rounded-md border text-sm transition-colors", slot === s.iso ? "border-accent text-ink" : "border-hairline text-ink-muted hover:bg-surface-1")}>
               {s.label}
             </button>
           ))}

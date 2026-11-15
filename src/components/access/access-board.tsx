@@ -163,7 +163,7 @@ function FilesAction({ onChange }: ActionProps) {
 
   return (
     <div className="space-y-3">
-      <label className={cn("flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-hairline-strong px-4 py-6 text-center hover:bg-surface-2 focus-within:border-primary")}>
+      <label className={cn("flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-hairline-strong px-4 py-6 text-center hover:bg-surface-2 focus-within:border-accent")}>
         <span className="font-medium">{t("access.dropTitle")}</span>
         <span className="text-sm text-ink-subtle">{t("access.dropHint")}</span>
         <input type="file" multiple accept="image/*,application/pdf" className="sr-only" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />

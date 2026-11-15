@@ -1,20 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import { Inter } from "next/font/google";
+import { RouteProvider } from "@/providers/router-provider";
+import { Theme } from "@/providers/theme";
+import "@/styles/globals.css";
+import { cx } from "@/utils/cx";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
-const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "ConsulSales Onboarding",
   description: "From signed contract to a running LinkedIn system in 30 days.",
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#010102" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0c0e12" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${mono.variable} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={cx(inter.variable, "bg-primary text-primary antialiased")}>
+        <RouteProvider>
+          <Theme>{children}</Theme>
+        </RouteProvider>
+      </body>
     </html>
   );
 }

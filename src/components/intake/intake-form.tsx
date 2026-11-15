@@ -127,7 +127,7 @@ export function IntakeForm({ store }: { store: IntakeStore }) {
               <button
                 type="button" onClick={() => setStep(s.id)}
                 className={cn("w-full rounded-md border px-2 py-1.5 text-left text-xs transition-colors",
-                  s.id === step ? "border-primary text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}
+                  s.id === step ? "border-accent text-ink" : "border-hairline text-ink-subtle hover:bg-surface-1")}
               >
                 {s.title}
               </button>

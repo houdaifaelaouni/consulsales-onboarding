@@ -39,7 +39,7 @@ export function CommentableText({
   const segs = segmentText(text, anchors);
   const byId = new Map(anchors.map((a) => [a.id, a]));
   return (
-    <div ref={ref} className="whitespace-pre-wrap rounded-lg border border-hairline bg-surface-1 p-4 leading-7 text-ink-muted selection:bg-primary/40 selection:text-ink">
+    <div ref={ref} className="whitespace-pre-wrap rounded-lg border border-hairline bg-surface-1 p-4 leading-7 text-ink-muted selection:bg-accent/40 selection:text-ink">
       {segs.map((s, i) =>
         s.threadId ? (
           <mark
@@ -47,7 +47,7 @@ export function CommentableText({
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(s.threadId!); } }}
             className={cn("cursor-pointer rounded-sm bg-surface-3 px-0.5 text-ink underline decoration-2 underline-offset-4",
               byId.get(s.threadId)?.resolved ? "decoration-hairline-strong" : "decoration-ink-subtle",
-              activeId === s.threadId && "decoration-primary")}
+              activeId === s.threadId && "decoration-accent")}
           >
             {s.text}
           </mark>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LayerStack } from "@/components/layer-stack";
-import { Badge, Button, buttonStyles, Card, EmptyState } from "@/components/ui";
+import { Badge, buttonStyles, Card, EmptyState } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   STAGES, completedStages, dayOfJourney, firstName, groupByStage, nextTask, progress, type HomeTask, type TaskStatus,
@@ -129,13 +129,6 @@ export default async function ClientHome() {
   );
 }
 
-function Shell({ children, locale = "en" }: { children: React.ReactNode; locale?: Locale }) {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 px-4 py-8 sm:py-12">
-      {children}
-      <form action="/auth/signout" method="post" className="pt-4">
-        <Button type="submit" variant="ghost">{t("app.signout", locale)}</Button>
-      </form>
-    </main>
-  );
+function Shell({ children }: { children: React.ReactNode; locale?: Locale }) {
+  return <main className="mx-auto flex max-w-xl flex-col gap-8 px-4 py-8 sm:py-12">{children}</main>;
 }

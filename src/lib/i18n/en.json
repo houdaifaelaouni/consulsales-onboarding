@@ -210,5 +210,20 @@
   "booking.done.body": "{when}. It is ticked off on your checklist.",
   "booking.ics": "Add to calendar",
   "booking.reschedule": "Choose another time",
-  "booking.loading": "Loading available times"
+  "booking.loading": "Loading available times",
+  "nav.menu": "Menu",
+  "nav.closeMenu": "Close menu",
+  "nav.skip": "Skip to content",
+  "nav.main": "Main navigation",
+  "nav.home": "Home",
+  "nav.intake": "Intake",
+  "nav.access": "Access",
+  "nav.review": "Deliverables",
+  "nav.payments": "Payments",
+  "nav.booking": "Kickoff call",
+  "nav.clients": "Clients",
+  "nav.allScreens": "All screens",
+  "nav.demoNotice": "Demo with sample data. Nothing is saved to a server.",
+  "nav.overview": "Overview",
+  "nav.signOut": "Sign out"
 }
