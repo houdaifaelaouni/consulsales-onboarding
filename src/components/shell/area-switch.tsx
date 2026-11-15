@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { t } from "@/lib/i18n";
