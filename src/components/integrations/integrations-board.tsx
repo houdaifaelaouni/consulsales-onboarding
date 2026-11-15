@@ -15,6 +15,9 @@ const KIND_COLOR: Record<EnvVar["kind"], "brand" | "gray" | "warning"> = { publi
 /** Shows which keys the server can see. It only ever receives true/false flags, so it cannot leak a value. */
 export function IntegrationsBoard({ status, appUrl, preview = false, canSave = false }: { status: EnvStatus; appUrl?: string; preview?: boolean; canSave?: boolean }) {
   const sum = summarize(status);
+  // What still needs doing comes first; finished integrations sink to the bottom.
+  const RANK: Record<IntegrationState, number> = { missing: 0, partial: 1, optional: 2, ready: 3 };
+  const ordered = INTEGRATIONS.map((i) => ({ i, ...integrationState(i, status) })).sort((a, b) => RANK[a.state] - RANK[b.state]);
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 lg:px-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -48,8 +51,7 @@ export function IntegrationsBoard({ status, appUrl, preview = false, canSave = f
       </Frame>
 
       <ul className="flex flex-col gap-6">
-        {INTEGRATIONS.map((i) => {
-          const { state, missing } = integrationState(i, status);
+        {ordered.map(({ i, state, missing }) => {
           return (
             <li key={i.id}>
               <Frame className="flex flex-col gap-5">
@@ -87,7 +89,7 @@ export function IntegrationsBoard({ status, appUrl, preview = false, canSave = f
                         )}
                       </div>
                       </div>
-                      {canSave && !preview && !v.bootstrap && <KeyForm name={v.name} isPublic={v.kind === "public"} isSet={!!status[v.name]} />}
+                      {canSave && !preview && !v.bootstrap && <KeyForm name={v.name} kind={v.kind} isSet={!!status[v.name]} generate={v.generate} />}
                     </li>
                   ))}
                 </ul>

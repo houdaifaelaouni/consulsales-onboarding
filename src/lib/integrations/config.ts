@@ -14,6 +14,8 @@ export interface EnvVar {
   example: string;
   /** Needed to save keys from the admin page itself, so it must be added in Vercel by hand, once. */
   bootstrap?: boolean;
+  /** The page can make this value itself (a random secret), so the founder never has to invent one. */
+  generate?: boolean;
 }
 
 export interface Integration {
@@ -96,18 +98,18 @@ export const INTEGRATIONS: Integration[] = [
     ],
   },
   {
-    id: "vercel", title: "Saving keys from this page", purpose: "Lets the admin page store keys for you instead of you opening Vercel.",
-    getItFrom: "Vercel → Account Settings → Tokens (create one scoped to your team). The team ID is in Team Settings → General.",
-    unlocks: "The Save buttons on every key below. Add these two in Vercel by hand, once.",
+    id: "vercel", title: "Saving keys from this page", purpose: "Lets this page store keys for you, so you never open Vercel's settings.",
+    getItFrom: "Vercel → Account Settings → Tokens: create one for your team and add it in Vercel as VERCEL_API_TOKEN, once.",
+    unlocks: "The paste boxes and Save buttons on every key below. The team is found automatically.",
     vars: [
       { name: "VERCEL_API_TOKEN", kind: "secret", required: false, purpose: "Token that may change this project's environment variables.", example: "a long token", bootstrap: true },
-      { name: "VERCEL_TEAM_ID", kind: "config", required: false, purpose: "Your Vercel team.", example: "team_…", bootstrap: true },
+      { name: "VERCEL_TEAM_ID", kind: "config", required: false, purpose: "Optional. Found automatically; only needed if that ever fails.", example: "team_…", bootstrap: true },
     ],
   },
   {
     id: "cron", title: "Scheduled jobs", purpose: "Reminders and syncs that run on a timer.", getItFrom: "Make one yourself: a long random string (for example 32 random characters).",
     unlocks: "Reminder emails and the weekly digest. Stops strangers from calling the job URLs.",
-    vars: [{ name: "CRON_SECRET", kind: "secret", required: true, purpose: "Shared secret that Vercel Cron sends with each job call.", example: "a long random string" }],
+    vars: [{ name: "CRON_SECRET", kind: "secret", required: true, generate: true, purpose: "Shared secret that Vercel Cron sends with each job call.", example: "a long random string" }],
   },
 ];
 

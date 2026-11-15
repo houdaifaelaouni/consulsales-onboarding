@@ -468,7 +468,7 @@
   "integrations.how.2": "Paste it into the box under its name and press Save. It is stored in Vercel as a write-only secret. For local work, put it in .env.local instead.",
   "integrations.how.3": "Press Deploy now, wait a minute, then press Re-check. The status turns to Set. This page never shows a saved value again.",
   "integrations.how.warn": "Paste keys only into the boxes on this page, never into chat or email. If one leaks, rotate it in the service straight away.",
-  "integrations.setupSaving": "To save keys from this page, add VERCEL_API_TOKEN and VERCEL_TEAM_ID in Vercel once (see the card below). Until then, add keys in Vercel by hand.",
+  "integrations.setupSaving": "To paste keys on this page, add VERCEL_API_TOKEN in Vercel once (see the card at the bottom). Until then, add keys in Vercel by hand.",
   "integrations.paste": "Paste a value for {name}",
   "integrations.pasteShort": "Paste the key",
   "integrations.replace": "Replace the key",
@@ -513,5 +513,6 @@
   "preview.note": "Preview with sample data. It will show real data once the backend is connected.",
   "login.start.title": "Payment received. Welcome!",
   "login.start.subtitle": "Enter the email you paid with. We send you a link that starts your onboarding.",
-  "login.start.error": "We are still setting up your workspace. Wait a minute, then try again."
+  "login.start.error": "We are still setting up your workspace. Wait a minute, then try again.",
+  "integrations.generate": "Generate for me"
 }
