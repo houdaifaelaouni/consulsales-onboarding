@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeHref, APP_NAV, DEMO_NAV, isActive } from "./nav";
+import { activeHref, ADMIN_NAV, APP_NAV, DEMO_NAV, isActive } from "./nav";
 
 describe("isActive", () => {
   it("matches a page and the pages beneath it", () => {
@@ -25,6 +25,9 @@ describe("activeHref", () => {
     expect(activeHref("/demo/review/icp", DEMO_NAV)).toBe("/demo/review");
     expect(activeHref("/demo/admin/mono-agency", DEMO_NAV)).toBe("/demo/admin");
     expect(activeHref("/somewhere/else", DEMO_NAV)).toBeUndefined();
+    expect(activeHref("/admin/clients/mono", ADMIN_NAV)).toBe("/admin");
+    expect(activeHref("/admin/integrations", ADMIN_NAV)).toBe("/admin/integrations");
+    expect(activeHref("/app/deliverables/icp", APP_NAV)).toBe("/app/deliverables");
   });
 });
 
@@ -33,5 +36,8 @@ describe("nav config", () => {
     expect(new Set(DEMO_NAV.map((n) => n.href)).size).toBe(DEMO_NAV.length);
     expect(DEMO_NAV.every((n) => n.href === "/demo" || n.href.startsWith("/demo/") || n.href === "/welcome")).toBe(true);
     expect(APP_NAV.every((n) => n.href.startsWith("/app"))).toBe(true);
+    expect(ADMIN_NAV.every((n) => n.href.startsWith("/admin"))).toBe(true);
+    // The two sides never share a link.
+    expect(APP_NAV.some((a) => ADMIN_NAV.some((b) => a.href === b.href))).toBe(false);
   });
 });

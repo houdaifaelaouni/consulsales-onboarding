@@ -17,7 +17,7 @@ import { PostPreview, ProfilePreview } from "./linkedin-preview";
 type Tab = "review" | "versions" | "preview";
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
-export function DeliverableReview({ deliverable, role = "client_owner" }: { deliverable: Deliverable; role?: Role }) {
+export function DeliverableReview({ deliverable, role = "client_owner", backHref = "/demo/review" }: { deliverable: Deliverable; role?: Role; backHref?: string }) {
   const latest = deliverable.versions[deliverable.versions.length - 1];
   const [status, setStatus] = useState<DeliverableStatus>(deliverable.status);
   const [approved, setApproved] = useState(deliverable.approved);
@@ -60,7 +60,7 @@ export function DeliverableReview({ deliverable, role = "client_owner" }: { deli
   return (
     <div className="space-y-6 pb-28">
       <div className="space-y-3">
-        <Link href="/demo/review" className="inline-flex min-h-10 items-center text-sm text-ink-subtle hover:text-ink">← {t("review.back")}</Link>
+        <Link href={backHref} className="inline-flex min-h-10 items-center text-sm text-ink-subtle hover:text-ink">← {t("review.back")}</Link>
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.6px]">{deliverable.title}</h1>
           <Badge tone={status === "approved" ? "success" : "neutral"} className="shrink-0">{t(`review.status.${status}` as "review.status.draft")}</Badge>

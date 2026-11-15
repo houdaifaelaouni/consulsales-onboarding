@@ -7,7 +7,7 @@ import { Button } from "@/components/base/buttons/button";
 import { LayerStack } from "@/components/layer-stack";
 import { completedStages, dayOfJourney, groupByStage, nextTask, progress, STAGES, type HomeTask, type TaskStatus } from "@/lib/home";
 import { t, tDynamic } from "@/lib/i18n";
-import { demoTaskHref } from "@/lib/dashboard/sample";
+import { taskHref as hrefFor } from "@/lib/dashboard/sample";
 import { StatCard } from "./stat-card";
 
 const STATUS_COLOR: Record<TaskStatus, "success" | "brand" | "error" | "gray"> = { done: "success", in_progress: "brand", blocked: "error", todo: "gray" };
@@ -26,7 +26,7 @@ export interface ClientDashboardProps {
 
 /** The client's overview: where they are, what is next, and the full checklist. Presentational only. */
 export function ClientDashboard({ name, company, startDate, now, tasks, links, nextPayment }: ClientDashboardProps) {
-  const taskHref = (type: string) => (links === "demo" ? demoTaskHref(type) : `/app/tasks/${type}`);
+  const taskHref = (type: string) => hrefFor(type, links === "demo" ? "/demo" : "/app");
   const day = Math.min(dayOfJourney(startDate, now), 30);
   const { done, total } = progress(tasks);
   const stages = completedStages(tasks);

@@ -13,7 +13,7 @@ import { blockedCount, computeFlags, filterClients, groupByStage, sortForBoard, 
 import type { AdminClient } from "@/lib/admin/types";
 import { FlagBadge } from "./flag-badge";
 
-export function AdminBoard({ clients, now }: { clients: AdminClient[]; now: string }) {
+export function AdminBoard({ clients, now, clientsBase = "/demo/admin" }: { clients: AdminClient[]; now: string; clientsBase?: string }) {
   const clock = useMemo(() => new Date(now), [now]);
   const [plan, setPlan] = useState("all");
   const [owner, setOwner] = useState("all");
@@ -74,7 +74,7 @@ export function AdminBoard({ clients, now }: { clients: AdminClient[]; now: stri
                       const flags = computeFlags(c, clock);
                       return (
                         <li key={c.id}>
-                          <Link href={`/demo/admin/${c.id}`} className="flex flex-col gap-3 rounded-xl bg-primary p-4 shadow-xs ring-1 ring-secondary transition hover:bg-primary_hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
+                          <Link href={`${clientsBase}/${c.id}`} className="flex flex-col gap-3 rounded-xl bg-primary p-4 shadow-xs ring-1 ring-secondary transition hover:bg-primary_hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
                             <div className="flex items-start justify-between gap-2">
                               <h3 className="text-md font-semibold text-primary">{c.company}</h3>
                               <Badge size="sm" color="gray">{t(`admin.plan.${c.plan}` as "admin.plan.pro")}</Badge>
@@ -108,7 +108,7 @@ export function AdminBoard({ clients, now }: { clients: AdminClient[]; now: stri
                 {sorted.map((c) => {
                   const flags = computeFlags(c, clock);
                   return (
-                    <Table.Row key={c.id} id={c.id} href={`/demo/admin/${c.id}`}>
+                    <Table.Row key={c.id} id={c.id} href={`${clientsBase}/${c.id}`}>
                       <Table.Cell className="font-medium text-primary">{c.company}</Table.Cell>
                       <Table.Cell className="max-sm:hidden">{t(`admin.plan.${c.plan}` as "admin.plan.pro")}</Table.Cell>
                       <Table.Cell className="max-md:hidden">{t(`admin.stage.${c.stage}` as "admin.stage.intake")}</Table.Cell>

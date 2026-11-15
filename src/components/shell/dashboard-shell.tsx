@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { FC } from "react";
 import {
-  BarChart07, Calendar, CheckVerified02, CreditCard02, File05, Flag01, Home01, Link01, LogOut01, Users01,
+  BarChart07, Calendar, CheckVerified02, CreditCard02, File05, Flag01, Home01, Key01, Link01, LogOut01, Users01,
 } from "@untitledui/icons";
 import { NavList } from "@/components/application/app-navigation/base-components/nav-list";
 import { MobileNavigationHeader } from "@/components/application/app-navigation/base-components/mobile-header";
 import type { NavItemType } from "@/components/application/app-navigation/config";
 import { Avatar } from "@/components/base/avatar/avatar";
+import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Tooltip } from "@/components/base/tooltip/tooltip";
 import { t } from "@/lib/i18n";
@@ -17,7 +18,7 @@ import { activeHref, type NavIcon, type NavItem } from "@/lib/nav";
 import { Logo } from "./logo";
 
 const ICONS: Record<NavIcon, FC<{ className?: string }>> = {
-  overview: Home01, intake: File05, access: Link01, review: CheckVerified02, payments: CreditCard02, booking: Calendar, clients: Users01, welcome: Flag01,
+  overview: Home01, intake: File05, access: Link01, review: CheckVerified02, payments: CreditCard02, booking: Calendar, clients: Users01, welcome: Flag01, integrations: Key01,
 };
 
 const SIDEBAR_WIDTH = 280;
@@ -48,8 +49,8 @@ function AccountCard({ user, canSignOut }: { user: ShellUser; canSignOut: boolea
 }
 
 /** Dashboard layout: fixed sidebar on large screens, a slide-in menu on phones, content on the right. */
-export function DashboardShell({ items, homeHref, user, canSignOut = false, footer, children }: {
-  items: NavItem[]; homeHref: string; user: ShellUser; canSignOut?: boolean; footer?: React.ReactNode; children: React.ReactNode;
+export function DashboardShell({ items, homeHref, user, canSignOut = false, areaLabel, footer, children }: {
+  items: NavItem[]; homeHref: string; user: ShellUser; canSignOut?: boolean; areaLabel?: string; footer?: React.ReactNode; children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const navItems: NavItemType[] = items.map((i) => ({ label: t(i.label), href: i.href, icon: ICONS[i.icon] ?? BarChart07 }));
@@ -61,6 +62,7 @@ export function DashboardShell({ items, homeHref, user, canSignOut = false, foot
     >
       <div className="px-4 lg:px-5">
         <Link href={homeHref}><Logo /></Link>
+        {areaLabel && <div className="mt-3"><Badge size="sm" color="brand">{areaLabel}</Badge></div>}
       </div>
       <nav aria-label={t("nav.main")}>
         <NavList activeUrl={activeHref(pathname, items)} items={navItems} />
