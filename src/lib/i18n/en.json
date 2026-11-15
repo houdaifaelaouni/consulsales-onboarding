@@ -514,5 +514,6 @@
   "login.start.title": "Payment received. Welcome!",
   "login.start.subtitle": "Enter the email you paid with. We send you a link that starts your onboarding.",
   "login.start.error": "We are still setting up your workspace. Wait a minute, then try again.",
-  "integrations.generate": "Generate for me"
+  "integrations.generate": "Generate for me",
+  "payments.confirming": "Thank you. We are confirming your payment with the payment provider. This page updates within a minute, refresh to check."
 }

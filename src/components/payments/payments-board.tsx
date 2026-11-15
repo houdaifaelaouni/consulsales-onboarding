@@ -13,7 +13,7 @@ import type { InvoiceStatus, MonthlyPlan, StageInvoice } from "@/lib/payments-ui
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const STATUS_COLOR: Record<InvoiceStatus, "success" | "warning" | "error" | "gray"> = { paid: "success", due: "warning", overdue: "error", locked: "gray" };
 
-export function PaymentsBoard({ initial, monthly, now, live = false }: { initial: StageInvoice[]; monthly: MonthlyPlan; now: string; live?: boolean }) {
+export function PaymentsBoard({ initial, monthly, now, live = false, confirming = false }: { initial: StageInvoice[]; monthly: MonthlyPlan; now: string; live?: boolean; confirming?: boolean }) {
   const clock = new Date(now);
   const [invoices, setInvoices] = useState(initial);
   const [notice, setNotice] = useState(false);
@@ -46,6 +46,8 @@ export function PaymentsBoard({ initial, monthly, now, live = false }: { initial
         />
         <StatCard label={t("payments.stat.progress")} value={`${s.paidCount} / ${s.total}`} progress={{ value: s.paidCount, max: s.total }} hint={t("payments.stat.progressHint", "en", { total: s.total })} />
       </section>
+
+      {confirming && <p role="status" className="rounded-xl bg-secondary p-4 text-sm text-secondary ring-1 ring-secondary">{t("payments.confirming")}</p>}
 
       {notice && (
         <div role="status" className="flex items-start justify-between gap-3 rounded-xl bg-secondary p-4 text-sm text-secondary ring-1 ring-secondary">

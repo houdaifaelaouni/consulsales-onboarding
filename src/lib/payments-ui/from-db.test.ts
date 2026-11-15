@@ -15,4 +15,10 @@ describe("toStageInvoices", () => {
     expect(s2.payUrl).toBe("https://pay.example/x");
     expect(s2.amountCents).toBe(90000);
   });
+  it("shows each stage's planned price when the plan is known, and the row's own amount once it has one", () => {
+    const rows = [{ stage: 2, amount_cents: null, currency: "eur", created_at: "2026-11-01T00:00:00Z", paid_at: null, pay_url: null, pdf_url: null }];
+    const list = toStageInvoices(rows, "pro");
+    expect(list.map((i) => i.amountCents)).toEqual([60000, 60000, 60000]);
+    expect(toStageInvoices([{ ...rows[0], amount_cents: 59000 }], "pro")[1].amountCents).toBe(59000);
+  });
 });

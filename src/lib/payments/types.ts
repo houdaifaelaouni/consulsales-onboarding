@@ -6,6 +6,8 @@ export interface NormalizedPayment {
   email: string;
   amount: string;
   currency: string;
+  /** The Whop plan the buyer picked (variant_id, `plan_...`). Used to know which of our plans was bought. */
+  planId?: string;
   metadata: Record<string, string>;
 }
 
