@@ -602,5 +602,18 @@
   "agency.error.forbidden": "Only the agency owner can change the plan.",
   "agency.error.not_upgrade": "Pick a plan higher than your current one.",
   "agency.error.unavailable": "This plan is not available yet. Please contact us.",
-  "agency.error.failed": "Checkout could not start. Please try again."
+  "agency.error.failed": "Checkout could not start. Please try again.",
+  "agency.rooms.new": "Open a client room",
+  "agency.rooms.company": "Client company",
+  "agency.rooms.email": "Client email",
+  "agency.rooms.cta": "Open room and invite client",
+  "agency.rooms.done": "Room opened. Your client was emailed a sign-in link.",
+  "agency.rooms.none": "You have no rooms left on this plan. Upgrade below to open more.",
+  "agency.rooms.list": "Your client rooms",
+  "agency.rooms.empty": "No client rooms yet.",
+  "agency.rooms.error.company": "Enter the client's company name (2 to 80 characters).",
+  "agency.rooms.error.email": "Enter a valid client email.",
+  "agency.rooms.error.limit": "You have no rooms left on this plan. Upgrade below to open more.",
+  "agency.rooms.error.forbidden": "Only members of this agency can open rooms.",
+  "agency.rooms.error.failed": "Could not open the room. Please try again."
 }
