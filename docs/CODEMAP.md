@@ -27,6 +27,8 @@ same PR when a structure changes. Last checked against main at migration `202611
 - `payments/`: provider-neutral interface (`types.ts`, `index.ts`), `whop.ts` (the only Whop code).
 - `integrations/`: `config.ts` (every key the app needs; `.env.example` is generated from it), `vercel.ts` (saving keys).
 - `i18n/`: `index.ts` + `en.json`. Every user-visible string goes through `t()`. Only English exists.
+- `payments/agency.ts` + `supabase-agency-repo.ts`: a verified agency-tier payment raises the agency tier (upgrade only, idempotent). `classify.ts` maps WHOP_AGENCY_PLAN_* ids to tiers; checkout for a plan uses `variantId`.
+- `agency/tiers.ts`: agency tier limits and prices (mirrors the SQL `agency_room_limit`), with tests.
 - `plans.ts` (plans, default tasks; stage prices are still null), `nav.ts`, `home.ts`.
 
 ## Database (`supabase/migrations`, applied BY HAND in the Supabase SQL editor)
@@ -42,6 +44,7 @@ same PR when a structure changes. Last checked against main at migration `202611
 | 0800 | `user_pin` (hashed, 15-minute lockout), `pin_*` functions, service role only |
 | 0900 | users may edit only name and locale; email unique and follows auth |
 | 1000 | event_log insert allow-list; approvals lock rows and name the version |
+| 20261122000100 | `agency`, `agency_member`, `workspace.agency_id`; tier room limit enforced by a trigger on workspace insert (free = 1 total, paid = N per month) |
 Each migration has a test in `supabase/tests/rls_*.sql` (ends with a "passed" select). Run both in the SQL editor; CI does not run them yet.
 
 ## Rules the database enforces (do not move these to the UI)

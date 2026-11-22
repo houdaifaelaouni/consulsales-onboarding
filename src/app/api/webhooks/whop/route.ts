@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { provisionWorkspace } from "@/lib/onboarding/provision";
 import { createSupabaseProvisionRepo } from "@/lib/onboarding/supabase-repo";
 import { getPaymentProvider } from "@/lib/payments";
+import { createSupabaseAgencyBilling } from "@/lib/payments/supabase-agency-repo";
 import { handleFailedPayment, handlePayment } from "@/lib/payments/handle";
 import { createSupabaseStageRepo } from "@/lib/payments/supabase-stage-repo";
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   if (event.kind === "ignored") return NextResponse.json({ ok: true, ignored: event.type });
 
   try {
-    const deps = { env: process.env, stageRepo: createSupabaseStageRepo(), provision: (p: typeof event.payment) => provisionWorkspace(createSupabaseProvisionRepo(), provider.name, p), saveCard: (w: string, m: string, c: string) => createSupabaseProvisionRepo().saveBilling(w, m, c) };
+    const deps = { env: process.env, stageRepo: createSupabaseStageRepo(), agency: createSupabaseAgencyBilling(), provision: (p: typeof event.payment) => provisionWorkspace(createSupabaseProvisionRepo(), provider.name, p), saveCard: (w: string, m: string, c: string) => createSupabaseProvisionRepo().saveBilling(w, m, c) };
     const res = event.kind === "payment_failed" ? await handleFailedPayment(deps, event.payment, event.reason) : await handlePayment(deps, event.payment);
     if (res.status !== 200) console.error("whop webhook not accepted", event.payment.eventId, String(res.body.error));
     return NextResponse.json(res.body, { status: res.status });
