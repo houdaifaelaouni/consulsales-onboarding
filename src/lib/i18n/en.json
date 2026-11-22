@@ -602,5 +602,18 @@
   "agency.error.forbidden": "Only the agency owner can change the plan.",
   "agency.error.not_upgrade": "Pick a plan higher than your current one.",
   "agency.error.unavailable": "This plan is not available yet. Please contact us.",
-  "agency.error.failed": "Checkout could not start. Please try again."
+  "agency.error.failed": "Checkout could not start. Please try again.",
+  "nav.adminAgencies": "Agencies",
+  "agencies.title": "Agencies",
+  "agencies.subtitle": "Agencies that onboard their own clients with ConsulSales.",
+  "agencies.empty": "No agencies yet.",
+  "agencies.new.title": "Add an agency",
+  "agencies.new.name": "Agency name",
+  "agencies.new.email": "Owner email",
+  "agencies.new.cta": "Create and invite owner",
+  "agencies.new.done": "Agency created. The owner was emailed a sign-in link.",
+  "agencies.error.name": "Enter an agency name between 2 and 80 characters.",
+  "agencies.error.email": "Enter a valid owner email.",
+  "agencies.error.forbidden": "Only an admin can add an agency.",
+  "agencies.error.failed": "Could not create the agency. Please try again."
 }

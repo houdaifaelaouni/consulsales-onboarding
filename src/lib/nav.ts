@@ -30,6 +30,7 @@ export const APP_NAV: NavItem[] = [
 /** Admin side: the team's tools. Never shown to clients. */
 export const ADMIN_NAV: NavItem[] = [
   { href: "/admin", label: "nav.adminClients", icon: "clients" },
+  { href: "/admin/agencies", label: "nav.adminAgencies", icon: "clients" },
   { href: "/admin/integrations", label: "nav.integrations", icon: "integrations" },
 ];
 
