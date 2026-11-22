@@ -1,4 +1,6 @@
+import { tierPrice } from "@/lib/agency/tiers";
 import { PLANS } from "@/lib/plans";
+import type { AgencyBilling } from "./agency";
 import { amountAtLeast, classifyPayment } from "./classify";
 import { settleStage, type StageRepo } from "./stage";
 import type { NormalizedPayment } from "./types";
@@ -9,6 +11,8 @@ export interface HandleDeps {
   /** Creates the workspace for a first payment. Resolves to its status. */
   provision: (payment: NormalizedPayment) => Promise<{ status: string }>;
   /** Remembers the buyer's card (server only) so later stages can be charged. Optional. */
+  /** Raises an agency to the tier it paid for. Optional so older callers keep working; an agency payment without it is refused. */
+  agency?: AgencyBilling;
   saveCard?: (workspaceId: string, memberId: string, paymentMethodId: string) => Promise<void>;
 }
 
@@ -34,6 +38,13 @@ export async function handlePayment(deps: HandleDeps, payment: NormalizedPayment
     const r = await settleStage(deps.stageRepo, payment, kind.workspaceId, kind.stage);
     if (r === "paid" && kind.stage === 1 && payment.memberId && payment.paymentMethodId) await deps.saveCard?.(kind.workspaceId, payment.memberId, payment.paymentMethodId);
     return r === "rejected" ? { status: 422, body: { error: "stage payment rejected" } } : { status: 200, body: { ok: true, result: r } };
+  }
+
+  if (kind.type === "agency") {
+    if (!deps.agency) return { status: 422, body: { error: "agency billing not available" } };
+    if (!amountAtLeast(payment.amount, tierPrice(kind.tier))) return { status: 422, body: { error: "amount below the tier price" } };
+    const r = await deps.agency.upgradeTier(kind.agencyId, kind.tier);
+    return r === "not_found" ? { status: 422, body: { error: "agency not found" } } : { status: 200, body: { ok: true, result: r } };
   }
 
   if (!amountAtLeast(payment.amount, PLANS[kind.plan].stagePrices[0])) return { status: 422, body: { error: "amount below the stage 1 price" } };

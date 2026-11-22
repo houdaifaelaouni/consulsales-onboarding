@@ -59,6 +59,15 @@ export const INTEGRATIONS: Integration[] = [
     ],
   },
   {
+    id: "agency-tiers", title: "Agency tiers", purpose: "Whop plans that agencies subscribe to (Starter, Growth, Scale).", getItFrom: "Whop dashboard → Products → one subscription plan per tier (starts with plan_).",
+    unlocks: "Agencies upgrading from the free tier to open more client rooms.",
+    vars: [
+      { name: "WHOP_AGENCY_PLAN_STARTER", kind: "config", required: false, purpose: "Whop plan id for the Starter tier.", example: "plan_…" },
+      { name: "WHOP_AGENCY_PLAN_GROWTH", kind: "config", required: false, purpose: "Whop plan id for the Growth tier.", example: "plan_…" },
+      { name: "WHOP_AGENCY_PLAN_SCALE", kind: "config", required: false, purpose: "Whop plan id for the Scale tier.", example: "plan_…" },
+    ],
+  },
+  {
     id: "resend", title: "Resend", purpose: "Transactional email.", getItFrom: "Resend dashboard → API Keys and Domains.",
     unlocks: "Invites, reminders, approval links and weekly digests in the client's language.",
     vars: [

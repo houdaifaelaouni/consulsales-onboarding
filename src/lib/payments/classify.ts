@@ -1,9 +1,11 @@
 import { PLANS, isPlanKey, type PlanKey } from "@/lib/plans";
+import { AGENCY_TIERS, type AgencyTier } from "@/lib/agency/tiers";
 import type { NormalizedPayment } from "./types";
 
 export type PaymentKind =
   | { type: "signup"; plan: PlanKey }
   | { type: "stage"; workspaceId: string; stage: 1 | 2 | 3 }
+  | { type: "agency"; agencyId: string; tier: AgencyTier }
   | { type: "unknown"; reason: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -17,9 +19,21 @@ export function planFromWhopId(planId: string | undefined, env: Env): PlanKey | 
   return planEnvs(env).find((x) => x.id === planId)?.key ?? null;
 }
 
+const PAID_TIERS: AgencyTier[] = ["starter", "growth", "scale"];
+
+/** Which agency tier a Whop plan id means, from the settings. */
+export function tierFromWhopId(planId: string | undefined, env: Env): AgencyTier | null {
+  if (!planId) return null;
+  return PAID_TIERS.find((t) => {
+    const name = AGENCY_TIERS[t].whopPlanEnv;
+    return !!name && env[name]?.trim() === planId;
+  }) ?? null;
+}
+
 /**
  * What a paid payment is for.
  * - a stage payment: made from a checkout WE created (metadata says which workspace and stage)
+ * - an agency tier: the plan id is one of the agency tier plans in the settings (the agency id in metadata is trusted only then)
  * - a sign-up: the buyer picked one of the plans mapped in the settings. Metadata alone is trusted only while no plan ids are set at all.
  */
 export function classifyPayment(p: NormalizedPayment, env: Env): PaymentKind {
@@ -27,6 +41,11 @@ export function classifyPayment(p: NormalizedPayment, env: Env): PaymentKind {
     const stage = Number(p.metadata.stage);
     if (!UUID.test(p.metadata.workspace_id ?? "") || (stage !== 1 && stage !== 2 && stage !== 3)) return { type: "unknown", reason: "bad stage metadata" };
     return { type: "stage", workspaceId: p.metadata.workspace_id, stage };
+  }
+  const tier = tierFromWhopId(p.planId, env);
+  if (tier) {
+    if (!UUID.test(p.metadata.agency_id ?? "")) return { type: "unknown", reason: "bad agency metadata" };
+    return { type: "agency", agencyId: p.metadata.agency_id, tier };
   }
   const mapped = planFromWhopId(p.planId, env);
   if (mapped) return { type: "signup", plan: mapped };

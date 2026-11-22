@@ -25,18 +25,20 @@ export function createWhopProvider(cfg: WhopConfig = {}): PaymentProvider {
       const res = await doFetch(`${baseUrl}/checkout_configurations`, {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          account_id: accountId,
-          mode: "payment",
-          redirect_url: req.redirectUrl,
-          metadata: req.metadata,
-          variant: {
-            title: req.title,
-            billing_type: "one_time",
-            initial_price: req.amount,
-            currency: req.currency,
-          },
-        }),
+        body: JSON.stringify(req.variantId
+          ? { account_id: accountId, variant_id: req.variantId, redirect_url: req.redirectUrl, metadata: req.metadata }
+          : {
+            account_id: accountId,
+            mode: "payment",
+            redirect_url: req.redirectUrl,
+            metadata: req.metadata,
+            variant: {
+              title: req.title,
+              billing_type: "one_time",
+              initial_price: req.amount,
+              currency: req.currency,
+            },
+          }),
       });
       if (!res.ok) throw new Error(`Whop checkout failed (${res.status})`);
       const body = (await res.json()) as { id: string; purchase_url: string | null };

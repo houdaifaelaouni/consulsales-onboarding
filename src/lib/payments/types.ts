@@ -26,6 +26,8 @@ export interface CheckoutRequest {
   currency: string;
   redirectUrl: string;
   metadata: Record<string, string>;
+  /** An existing provider plan (Whop `plan_...`), for subscriptions. When set, the plan defines the title and price and those fields are ignored. */
+  variantId?: string;
 }
 
 /** Charge a card the buyer saved earlier, without them present (off-session). The outcome arrives later as a webhook. */
