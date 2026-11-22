@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { NewRoomForm } from "@/components/agency/new-room-form";
 import { TierUpgrade, type TierOption } from "@/components/agency/tier-upgrade";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Notice } from "@/components/shell/notice";
@@ -17,9 +18,10 @@ export default async function AgencyPage() {
   const agencyId = m?.[0]?.agency_id as string | undefined;
   if (!agencyId) return <Notice icon="waiting" title={t("agency.empty.title")} body={t("agency.empty.body")} />;
 
-  const [{ data: agency }, { data: used, error }] = await Promise.all([
+  const [{ data: agency }, { data: used, error }, { data: rooms }] = await Promise.all([
     supabase.from("agency").select("name,tier").eq("id", agencyId).maybeSingle(),
     supabase.rpc("agency_usage", { p_agency: agencyId }),
+    supabase.from("workspace").select("id,company,created_at").eq("agency_id", agencyId).order("created_at", { ascending: false }),
   ]);
   if (error || !agency || !isAgencyTier(agency.tier) || typeof used !== "number") {
     return <Notice icon="error" title={t("agency.error.title")} body={t("agency.error.body")} />;
@@ -45,6 +47,26 @@ export default async function AgencyPage() {
           hint={t(tier.period === "month" ? "agency.period.month" : "agency.period.total")}
         />
         <StatCard label={t("agency.roomsLeft")} value={String(roomsLeft(tier.key, used))} />
+      </section>
+
+      <NewRoomForm roomsLeft={roomsLeft(tier.key, used)} />
+
+      <section className="flex flex-col gap-3" aria-labelledby="rooms-h">
+        <h2 id="rooms-h" className="text-lg font-semibold text-primary">{t("agency.rooms.list")}</h2>
+        {(rooms ?? []).length === 0 ? (
+          <p role="status" className="text-sm text-tertiary">{t("agency.rooms.empty")}</p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {(rooms ?? []).map((r) => (
+              <li key={r.id as string}>
+                <a href={`/admin/clients/${r.id as string}`} className="flex items-center justify-between gap-2 rounded-xl bg-primary p-4 ring-1 ring-secondary hover:bg-secondary">
+                  <span className="text-sm font-semibold text-primary">{r.company as string}</span>
+                  <span className="text-sm text-tertiary">{new Date(r.created_at as string).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-4" aria-labelledby="upgrade-h">
