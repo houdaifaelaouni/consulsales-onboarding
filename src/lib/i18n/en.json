@@ -730,5 +730,11 @@
   "brand.welcome": "Welcome, {name}",
   "brand.welcomeBody": "Your onboarding checklist is ready.",
   "brand.cta": "Start onboarding",
-  "brand.newName": "Brand {n}"
+  "brand.newName": "Brand {n}",
+  "agency.rooms.empty": "No client rooms yet.",
+  "agency.rooms.error.company": "Enter the client's company name (2 to 80 characters).",
+  "agency.rooms.error.email": "Enter a valid client email.",
+  "agency.rooms.error.limit": "You have no rooms left on this plan. Upgrade below to open more.",
+  "agency.rooms.error.forbidden": "Only members of this agency can open rooms.",
+  "agency.rooms.error.failed": "Could not open the room. Please try again."
 }
