@@ -29,6 +29,7 @@ same PR when a structure changes. Last checked against main at migration `202611
 - `i18n/`: `index.ts` + `en.json`. Every user-visible string goes through `t()`. Only English exists.
 - `payments/agency.ts` + `supabase-agency-repo.ts`: a verified agency-tier payment raises the agency tier (upgrade only, idempotent). `classify.ts` maps WHOP_AGENCY_PLAN_* ids to tiers; checkout for a plan uses `variantId`.
 - `agency/tiers.ts`: agency tier limits and prices (mirrors the SQL `agency_room_limit`), with tests.
+- `outreach/`: `unipile.ts` (hosted LinkedIn login link, the only Unipile call), `connect.ts` (consent + single-use token flow), `status.ts` (webhook parsing), `secret.ts`; webhooks at `api/webhooks/unipile/{connected,status}`.
 - `plans.ts` (plans, default tasks; stage prices are still null), `nav.ts`, `home.ts`.
 
 ## Database (`supabase/migrations`, applied BY HAND in the Supabase SQL editor)

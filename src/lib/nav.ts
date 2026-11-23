@@ -29,6 +29,7 @@ export const APP_NAV: NavItem[] = [
   { href: "/app/access", label: "nav.access", icon: "access" },
   { href: "/app/deliverables", label: "nav.review", icon: "review" },
   { href: "/app/payments", label: "nav.payments", icon: "payments" },
+  { href: "/app/outreach", label: "nav.outreach", icon: "overview" },
   { href: "/app/booking", label: "nav.booking", icon: "booking" },
   { href: "/app/account", label: "nav.account", icon: "account" },
 ];
