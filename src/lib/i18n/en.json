@@ -736,5 +736,9 @@
   "agency.rooms.error.email": "Enter a valid client email.",
   "agency.rooms.error.limit": "You have no rooms left on this plan. Upgrade below to open more.",
   "agency.rooms.error.forbidden": "Only members of this agency can open rooms.",
-  "agency.rooms.error.failed": "Could not open the room. Please try again."
+  "agency.rooms.error.failed": "Could not open the room. Please try again.",
+  "nav.adminAgencies": "Agencies",
+  "agencies.empty": "No agencies yet.",
+  "agencies.error.forbidden": "Only an admin can add an agency.",
+  "agencies.error.failed": "Could not create the agency. Please try again."
 }
