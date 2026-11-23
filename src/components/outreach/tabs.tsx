@@ -5,6 +5,7 @@ import { cx } from "@/utils/cx";
 const TABS = [
   { key: "account", href: "/app/outreach", label: "outreach.tabs.account" },
   { key: "leads", href: "/app/outreach/leads", label: "outreach.tabs.leads" },
+  { key: "campaigns", href: "/app/outreach/campaigns", label: "outreach.tabs.campaigns" },
 ] as const;
 
 export type OutreachTab = (typeof TABS)[number]["key"];
