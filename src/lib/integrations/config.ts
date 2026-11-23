@@ -68,6 +68,15 @@ export const INTEGRATIONS: Integration[] = [
     ],
   },
   {
+    id: "unipile", title: "Unipile", purpose: "Connects clients' LinkedIn accounts so they can run outreach.", getItFrom: "Unipile dashboard: your DSN and an API key. In Webhooks, add an Account status webhook with a custom header Unipile-Auth holding the same secret.",
+    unlocks: "Clients connecting LinkedIn from the Outreach tab, and account status updates.", webhookPath: "/api/webhooks/unipile/status",
+    vars: [
+      { name: "UNIPILE_DSN", kind: "config", required: false, purpose: "Your Unipile server address.", example: "api1.unipile.com:13111" },
+      { name: "UNIPILE_API_KEY", kind: "secret", required: false, purpose: "Lets the server create LinkedIn sign-in links.", example: "unipile access token" },
+      { name: "UNIPILE_WEBHOOK_SECRET", kind: "secret", required: false, generate: true, purpose: "Checks that notifications really come from Unipile.", example: "a long random string" },
+    ],
+  },
+  {
     id: "resend", title: "Resend", purpose: "Transactional email.", getItFrom: "Resend dashboard → API Keys and Domains.",
     unlocks: "Invites, reminders, approval links and weekly digests in the client's language.",
     vars: [
