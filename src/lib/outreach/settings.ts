@@ -1,5 +1,5 @@
 /** Hard limits. The database enforces the same numbers (outreach_settings checks): keep both in step. */
-export const CAPS = { invitesPerDay: 30, messagesPerDay: 50, earliest: "06:00", latest: "22:00" } as const;
+export const CAPS = { invitesPerDay: 20, messagesPerDay: 50, earliest: "06:00", latest: "22:00" } as const;
 
 export interface OutreachSettings {
   invitesPerDay: number;
@@ -11,7 +11,7 @@ export interface OutreachSettings {
   warmup: boolean;
 }
 
-export const DEFAULT_SETTINGS: OutreachSettings = { invitesPerDay: 15, messagesPerDay: 30, workStart: "08:00", workEnd: "18:00", timezone: "Europe/Madrid", weekdaysOnly: true, warmup: true };
+export const DEFAULT_SETTINGS: OutreachSettings = { invitesPerDay: 12, messagesPerDay: 30, workStart: "08:00", workEnd: "18:00", timezone: "Europe/Madrid", weekdaysOnly: true, warmup: true };
 
 export const TIMEZONES = [
   "Europe/Madrid", "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Lisbon", "Europe/Amsterdam", "Europe/Rome", "Africa/Casablanca",

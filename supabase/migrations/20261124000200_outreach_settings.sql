@@ -1,10 +1,10 @@
 -- Outreach settings per workspace. The client controls them, but inside hard limits that the table itself enforces,
--- so no screen, job or API call can go past them: at most 30 invitations and 50 messages a day, working hours only
+-- so no screen, job or API call can go past them: at most 20 invitations and 50 messages a day, working hours only
 -- between 06:00 and 22:00. A new workspace starts paused; sending also stops while an admin has stopped it.
 
 create table public.outreach_settings (
   workspace_id uuid primary key references public.workspace (id) on delete cascade,
-  invites_per_day int not null default 15 check (invites_per_day between 0 and 30),
+  invites_per_day int not null default 12 check (invites_per_day between 0 and 20),
   messages_per_day int not null default 30 check (messages_per_day between 0 and 50),
   work_start time not null default '08:00',
   work_end time not null default '18:00',

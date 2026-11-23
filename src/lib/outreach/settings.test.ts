@@ -10,7 +10,7 @@ describe("validateSettings", () => {
     expect(ok({ invitesPerDay: 0, messagesPerDay: 0 }).ok).toBe(true);
   });
   it("refuses a limit above the cap, below zero, or not a whole number", () => {
-    expect(ok({ invitesPerDay: 31 })).toEqual({ ok: false, field: "invitesPerDay" });
+    expect(ok({ invitesPerDay: 21 })).toEqual({ ok: false, field: "invitesPerDay" });
     expect(ok({ invitesPerDay: -1 })).toEqual({ ok: false, field: "invitesPerDay" });
     expect(ok({ invitesPerDay: 2.5 })).toEqual({ ok: false, field: "invitesPerDay" });
     expect(ok({ invitesPerDay: Number.NaN })).toEqual({ ok: false, field: "invitesPerDay" });

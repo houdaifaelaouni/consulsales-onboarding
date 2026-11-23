@@ -18,22 +18,22 @@ begin
   set local role authenticated;
   perform set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-0000000000c5","role":"authenticated"}',true);
 
-  perform public.outreach_settings_save(ws, 20, 40, '09:00', '17:00', 'Europe/Madrid', true, true);
+  perform public.outreach_settings_save(ws, 18, 40, '09:00', '17:00', 'Europe/Madrid', true, true);
   select * into s from public.outreach_settings where workspace_id = ws;
-  assert s.invites_per_day = 20 and s.messages_per_day = 40 and s.paused, 'owner saves limits and a new workspace starts paused';
+  assert s.invites_per_day = 18 and s.messages_per_day = 40 and s.paused, 'owner saves limits and a new workspace starts paused';
 
   -- hard limits
-  ok := false; begin perform public.outreach_settings_save(ws, 31, 40, '09:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
-  assert ok, 'more than 30 invitations a day is refused';
-  ok := false; begin perform public.outreach_settings_save(ws, 20, 51, '09:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
+  ok := false; begin perform public.outreach_settings_save(ws, 21, 40, '09:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
+  assert ok, 'more than 20 invitations a day is refused';
+  ok := false; begin perform public.outreach_settings_save(ws, 18, 51, '09:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
   assert ok, 'more than 50 messages a day is refused';
-  ok := false; begin perform public.outreach_settings_save(ws, 20, 40, '05:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
+  ok := false; begin perform public.outreach_settings_save(ws, 18, 40, '05:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
   assert ok, 'working hours before 06:00 are refused';
-  ok := false; begin perform public.outreach_settings_save(ws, 20, 40, '09:00', '23:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
+  ok := false; begin perform public.outreach_settings_save(ws, 18, 40, '09:00', '23:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
   assert ok, 'working hours after 22:00 are refused';
-  ok := false; begin perform public.outreach_settings_save(ws, 20, 40, '17:00', '09:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
+  ok := false; begin perform public.outreach_settings_save(ws, 18, 40, '17:00', '09:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
   assert ok, 'an end before the start is refused';
-  ok := false; begin perform public.outreach_settings_save(ws, 20, 40, '09:00', '17:00', 'Mars/Olympus', true, true); exception when others then ok := true; end;
+  ok := false; begin perform public.outreach_settings_save(ws, 18, 40, '09:00', '17:00', 'Mars/Olympus', true, true); exception when others then ok := true; end;
   assert ok, 'an unknown timezone is refused';
   ok := false; begin perform public.outreach_settings_save(ws, -1, 40, '09:00', '17:00', 'Europe/Madrid', true, true); exception when others then ok := true; end;
   assert ok, 'a negative limit is refused';
