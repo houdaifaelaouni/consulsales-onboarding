@@ -16,7 +16,12 @@ Read `docs/CODEMAP.md` before searching the code. It lists where each feature li
   the database refuses to send a deliverable until its stage is paid. Admins can set custom stage prices, make a stage
   free (waive) or give a free trial (entry only) from the client page; every change is logged.
 - v1 scope rule: if a story is not needed to onboard the 3 pilot clients, it moves to v2.
-- Never automate LinkedIn actions; never store LinkedIn passwords.
+- Outreach automation (founder decision, Nov 2026, replaces the old "never automate LinkedIn actions" rule): clients may run
+  automated LinkedIn outreach through Unipile. The client owns the LinkedIn account and the outreach settings and is responsible
+  for them; before connecting, they must accept a recorded risk notice (automation can breach LinkedIn's terms and LinkedIn may
+  restrict the account). Safety is enforced in the database, not the screen: hard daily caps, working hours, a client pause
+  switch and an admin kill switch that stops all sending. Sending stops on a reply, a disconnect or a restriction signal.
+- Never store LinkedIn passwords: the client signs in on Unipile's hosted page only. Unipile keys live in Vercel env vars.
 
 ## Stack
 Next.js 15 (App Router), TypeScript strict, Tailwind, Supabase (EU region) with RLS + Auth (magic
