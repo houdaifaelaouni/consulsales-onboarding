@@ -37,7 +37,6 @@ export function LeadsTable({ rows, total, page, pages, status, base, id }: {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [hidden, setHidden] = useState<ColumnKey[]>([]);
-  const [selected, setSelected] = useState<string[]>([]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -49,10 +48,8 @@ export function LeadsTable({ rows, total, page, pages, status, base, id }: {
 
   const visible = (key: ColumnKey) => !hidden.includes(key);
   const href = (nextStatus: LeadStatus | "all", nextPage = 1) => `${base}/${id}/leads?status=${nextStatus}&page=${nextPage}`;
-  const allShown = selected.length > 0 && selected.length === shown.length;
 
   function goStatus(next: string) {
-    setSelected([]);
     router.push(href(next as LeadStatus | "all"));
   }
 
@@ -116,10 +113,6 @@ export function LeadsTable({ rows, total, page, pages, status, base, id }: {
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-secondary">
             <tr className="text-xs font-medium uppercase tracking-wide text-tertiary">
-              <th scope="col" className="w-10 px-3 py-2">
-                <input type="checkbox" aria-label={t("outreach.lt.selectAll")} checked={allShown}
-                  onChange={(e) => setSelected(e.target.checked ? shown.map((r) => r.id) : [])} />
-              </th>
               <th scope="col" className="px-3 py-2">#</th>
               {COLUMNS.filter((c) => visible(c.key)).map((c) => (
                 <th key={c.key} scope="col" className={cx("px-3 py-2", (c.key === "phone" || c.key === "domain" || c.key === "location") && "hidden lg:table-cell")}>{t(c.label)}</th>
@@ -134,10 +127,6 @@ export function LeadsTable({ rows, total, page, pages, status, base, id }: {
               const name = splitName(lead.fullName);
               return (
                 <tr key={lead.id} className="border-t border-secondary">
-                  <td className="px-3 py-3">
-                    <input type="checkbox" aria-label={lead.fullName} checked={selected.includes(lead.id)}
-                      onChange={(e) => setSelected((s) => (e.target.checked ? [...s, lead.id] : s.filter((x) => x !== lead.id)))} />
-                  </td>
                   <td className="px-3 py-3 text-tertiary">{new Intl.NumberFormat("en-US").format((page - 1) * LEADS_PER_PAGE + i + 1)}</td>
                   {visible("first") && (
                     <td className="px-3 py-3">
@@ -161,7 +150,6 @@ export function LeadsTable({ rows, total, page, pages, status, base, id }: {
           </tbody>
         </table>
       </div>
-      {selected.length > 0 && <p role="status" className="text-sm text-secondary">{t("outreach.lt.selected", "en", { n: selected.length })}</p>}
       <p className="text-xs text-tertiary">{t("outreach.lt.perPage", "en", { n: LEADS_PER_PAGE })}</p>
     </section>
   );

@@ -13,7 +13,7 @@ import { Notice } from "@/components/shell/notice";
 import { t } from "@/lib/i18n";
 import { campaignProgress } from "@/lib/outreach/analytics";
 import { DEFAULT_SETTINGS, shortTime } from "@/lib/outreach/settings";
-import { formatDate, type CampaignStatus, type Channel } from "@/lib/outreach/workspace";
+import { channelInfo, formatDate, type CampaignStatus, type Channel } from "@/lib/outreach/workspace";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -85,7 +85,7 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
                   <div className="flex min-w-0 flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link href={`${BASE}/${c.id}`} className="text-md font-semibold text-primary hover:underline">{c.name}</Link>
-                      <Badge size="sm" color="gray">{t(c.channel === "linkedin" ? "outreach.ch.linkedin" : "outreach.ch.linkedin")}</Badge>
+                      <Badge size="sm" color="gray">{t(channelInfo(c.channel).label)}</Badge>
                       <Badge size="sm" color={STATUS_TONE[c.status]}>{t(STATUS_LABEL[c.status])}</Badge>
                     </div>
                     <p className="text-sm text-tertiary">{c.description ?? t("outreach.cl.noDescription")}</p>

@@ -8,8 +8,8 @@ import { t } from "@/lib/i18n";
 import type { CampaignStatus } from "@/lib/outreach/workspace";
 import { STATUS_LABEL, STATUS_TONE } from "@/components/outreach/campaign/status";
 
-export function CampaignHeader({ id, name, status, base, channelsHref, canEdit, live }: {
-  id: string; name: string; status: CampaignStatus; base: string; channelsHref: string; canEdit: boolean; live: boolean;
+export function CampaignHeader({ id, name, status, base, channelsHref, addLeadsHref, canEdit, live }: {
+  id: string; name: string; status: CampaignStatus; base: string; channelsHref: string; addLeadsHref: string; canEdit: boolean; live: boolean;
 }) {
   return (
     <header className="flex flex-col gap-4">
@@ -24,7 +24,7 @@ export function CampaignHeader({ id, name, status, base, channelsHref, canEdit, 
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" color="secondary" href={channelsHref}>{t("outreach.ws.channels")}</Button>
-          <Button size="sm" color="secondary" href={`${base}/${id}/leads`}>{t("outreach.ws.addLeads")}</Button>
+          <Button size="sm" color="secondary" href={addLeadsHref}>{t("outreach.ws.addLeads")}</Button>
           <CampaignStatusButton id={id} status={status} canEdit={canEdit} live={live} />
           <Badge size="sm" color={STATUS_TONE[status]}>{t(STATUS_LABEL[status])}</Badge>
         </div>

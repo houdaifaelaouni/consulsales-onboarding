@@ -8,8 +8,8 @@ import { AGENT_LIMITS, validateAgent, type AgentProfile } from "@/lib/outreach/a
 import { TIMEZONES } from "@/lib/outreach/settings";
 import { cx } from "@/utils/cx";
 
-function Area({ label, hint, value, max, disabled, onChange, onBlur }: {
-  label: string; hint: string; value: string; max: number; disabled: boolean; onChange: (v: string) => void; onBlur: () => void;
+function Area({ label, hint, value, max, onChange, onBlur }: {
+  label: string; hint: string; value: string; max: number; onChange: (v: string) => void; onBlur: () => void;
 }) {
   const over = value.length > max;
   return (
@@ -18,7 +18,7 @@ function Area({ label, hint, value, max, disabled, onChange, onBlur }: {
         <h2 className="text-md font-semibold text-primary">{label}</h2>
         <p className="text-sm text-tertiary">{hint}</p>
       </div>
-      <textarea rows={5} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} onBlur={onBlur}
+      <textarea rows={5} value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur}
         className="rounded-lg border border-secondary bg-secondary px-3 py-2 text-sm text-primary" />
       <p className={cx("text-xs", over ? "text-error-primary" : "text-tertiary")}>{t("outreach.ag.chars", "en", { n: value.length, max })}</p>
     </section>
@@ -61,9 +61,9 @@ export function AgentForm({ initial, live }: { initial: AgentProfile; live: bool
       </section>
 
       <Area label={t("outreach.ag.context")} hint={t("outreach.ag.contextHint")} value={value.context} max={AGENT_LIMITS.context}
-        disabled={false} onChange={(v) => set({ context: v })} onBlur={() => save(value)} />
+        onChange={(v) => set({ context: v })} onBlur={() => save(value)} />
       <Area label={t("outreach.ag.icp")} hint={t("outreach.ag.icpHint")} value={value.icp} max={AGENT_LIMITS.icp}
-        disabled={false} onChange={(v) => set({ icp: v })} onBlur={() => save(value)} />
+        onChange={(v) => set({ icp: v })} onBlur={() => save(value)} />
 
       <section className="flex flex-col gap-3 rounded-2xl border border-secondary bg-primary p-5">
         <div className="flex flex-col gap-1">
@@ -87,11 +87,11 @@ export function AgentForm({ initial, live }: { initial: AgentProfile; live: bool
       </section>
 
       <Area label={t("outreach.ag.positioning")} hint={t("outreach.ag.positioningHint")} value={value.positioning} max={AGENT_LIMITS.positioning}
-        disabled={false} onChange={(v) => set({ positioning: v })} onBlur={() => save(value)} />
+        onChange={(v) => set({ positioning: v })} onBlur={() => save(value)} />
       <Area label={t("outreach.ag.instructions")} hint={t("outreach.ag.instructionsHint", "en", { tag: "{custom_content_instructions}" })}
-        value={value.instructions} max={AGENT_LIMITS.instructions} disabled={false} onChange={(v) => set({ instructions: v })} onBlur={() => save(value)} />
+        value={value.instructions} max={AGENT_LIMITS.instructions} onChange={(v) => set({ instructions: v })} onBlur={() => save(value)} />
       <Area label={t("outreach.ag.notes")} hint={t("outreach.ag.notesHint", "en", { tag: "{user_notes}" })}
-        value={value.notes} max={AGENT_LIMITS.notes} disabled={false} onChange={(v) => set({ notes: v })} onBlur={() => save(value)} />
+        value={value.notes} max={AGENT_LIMITS.notes} onChange={(v) => set({ notes: v })} onBlur={() => save(value)} />
 
       <section className="flex flex-col gap-2 rounded-2xl border border-secondary bg-primary p-5">
         <label className="flex flex-col gap-1.5 text-sm font-medium text-secondary">

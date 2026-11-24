@@ -13,7 +13,7 @@ export default async function DemoCampaignLayout({ children, params }: { childre
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 lg:px-8">
       <CampaignHeader
         id={campaign.id} name={campaign.name} status={campaign.status} base="/demo/outreach/campaigns"
-        channelsHref="/demo/outreach" canEdit live={false}
+        channelsHref="/demo/outreach" addLeadsHref="/demo/outreach" canEdit live={false}
       />
       {children}
     </main>

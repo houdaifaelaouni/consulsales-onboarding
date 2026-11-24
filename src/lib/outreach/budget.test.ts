@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitBudget, splitShares } from "./budget";
+import { splitBudget } from "./budget";
 
 describe("splitBudget", () => {
   it("divides a daily limit across the profiles that share it", () => {
@@ -11,17 +11,5 @@ describe("splitBudget", () => {
     expect(splitBudget(0, 4)).toBe(0);
     expect(splitBudget(-5, 4)).toBe(0);
     expect(splitBudget(20, 0)).toBe(20);
-  });
-});
-
-describe("splitShares", () => {
-  it("adds back to the total and puts the remainder first", () => {
-    expect(splitShares(20, 3)).toEqual([7, 7, 6]);
-    expect(splitShares(10, 4)).toEqual([3, 3, 2, 2]);
-    expect(splitShares(10, 4).reduce((a, b) => a + b, 0)).toBe(10);
-  });
-  it("handles no budget and a single profile", () => {
-    expect(splitShares(0, 3)).toEqual([0, 0, 0]);
-    expect(splitShares(12, 1)).toEqual([12]);
   });
 });

@@ -22,7 +22,8 @@ export default async function CampaignLayout({ children, params }: { children: R
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 lg:px-8">
       <CampaignHeader
         id={campaign.id as string} name={campaign.name as string} status={campaign.status as CampaignStatus}
-        base="/app/outreach/campaigns" channelsHref="/app/outreach" canEdit={m?.[0]?.role === "client_owner"} live
+        base="/app/outreach/campaigns" channelsHref="/app/outreach" addLeadsHref="/app/outreach/leads"
+        canEdit={m?.[0]?.role === "client_owner"} live
       />
       {children}
     </main>

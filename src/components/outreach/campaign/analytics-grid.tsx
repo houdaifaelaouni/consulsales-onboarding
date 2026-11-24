@@ -1,4 +1,4 @@
-import { CalendarCheck01, Check, CheckCircle, Container, Flag01, LayersTwo01, RefreshCw01, Star01, User01, XCircle } from "@untitledui/icons";
+import { CalendarCheck01, CheckCircle, Container, Flag01, LayersTwo01, RefreshCw01, Star01, User01 } from "@untitledui/icons";
 import { PlatformChip } from "@/components/outreach/platform-pills";
 import { t } from "@/lib/i18n";
 import { rates, type CampaignCounts } from "@/lib/outreach/analytics";
@@ -42,14 +42,6 @@ export function AnalyticsGrid({ counts, channel }: { counts: CampaignCounts; cha
     {
       key: "meetings", icon: <CalendarCheck01 aria-hidden className="size-4" />, label: t("outreach.an.meetings"),
       value: n(counts.meetings), hint: t("outreach.an.meetingsHint", "en", { p: r.meetingsOfPositive, m: r.meetingsOfMessages }), tone: "text-success-primary",
-    },
-    {
-      key: "completed", icon: <Check aria-hidden className="size-4" />, label: t("outreach.an.completed"),
-      value: n(counts.completed), hint: t("outreach.an.completedHint", "en", { n: n(counts.completed) }), tone: "text-primary",
-    },
-    {
-      key: "stopped", icon: <XCircle aria-hidden className="size-4" />, label: t("outreach.an.stopped"),
-      value: n(counts.stopped), hint: t("outreach.an.stoppedHint", "en", { n: n(counts.stopped) }), tone: "text-tertiary",
     },
   ];
 

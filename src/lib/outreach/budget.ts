@@ -8,12 +8,3 @@ export function splitBudget(total: number, profiles: number): number {
   const n = Math.max(1, Math.floor(profiles));
   return Math.ceil(total / n);
 }
-
-/** The same split as a list, biggest share first, adding back to the total exactly. */
-export function splitShares(total: number, profiles: number): number[] {
-  const n = Math.max(1, Math.floor(profiles));
-  if (!Number.isFinite(total) || total <= 0) return Array.from({ length: n }, () => 0);
-  const each = Math.floor(total / n);
-  const rest = total - each * n;
-  return Array.from({ length: n }, (_, i) => each + (i < rest ? 1 : 0));
-}

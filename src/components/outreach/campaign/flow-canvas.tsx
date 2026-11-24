@@ -152,7 +152,6 @@ export function FlowCanvas({ graph, steps, campaignId, name, approvedLeads, canE
       {note && <p role="status" className="text-sm text-secondary">{note}</p>}
       {editable && (
         <div className="flex flex-wrap items-center gap-2">
-          <Button color="secondary" isDisabled={pending} onPress={() => save(false)}>{t("outreach.fl.save")}</Button>
           <Button isDisabled={pending || approvedLeads === 0} onPress={() => save(true)}>{t("outreach.camp.launch", "en", { n: approvedLeads })}</Button>
           {approvedLeads === 0 && <p className="text-sm text-tertiary">{t("outreach.camp.noApproved")}</p>}
         </div>

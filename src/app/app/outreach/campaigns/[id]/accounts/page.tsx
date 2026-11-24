@@ -3,7 +3,6 @@ import { CampaignAccounts } from "@/components/outreach/campaign/campaign-accoun
 import { Notice } from "@/components/shell/notice";
 import { t } from "@/lib/i18n";
 import { DEFAULT_SETTINGS } from "@/lib/outreach/settings";
-import { isAccountStatus } from "@/lib/outreach/status";
 import type { ProfileView } from "@/lib/outreach/workspace";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,7 +31,7 @@ export default async function CampaignAccountsPage({ params }: { params: Promise
     perAccount.set(key, (perAccount.get(key) ?? 0) + 1);
   }
   const profiles: ProfileView[] = (accounts.data ?? [])
-    .filter((a) => isAccountStatus(a.status) && a.status === "ok")
+    .filter((a) => a.status === "ok")
     .map((a) => ({
       id: a.id as string,
       name: t("outreach.ac.profile", "en", { ref: String(a.unipile_account_id).slice(-6) }),
@@ -46,7 +45,7 @@ export default async function CampaignAccountsPage({ params }: { params: Promise
       profiles={profiles}
       selected={(assigned.data ?? []).map((r) => r.account_id as string)}
       perDay={cfg.data ? (cfg.data.invites_per_day as number) : DEFAULT_SETTINGS.invitesPerDay}
-      campaigns={profiles.length > 0 ? Math.max(1, perAccount.get(profiles[0].id) ?? 1) : 1}
+      campaigns={Math.max(1, ...[...perAccount.values()])}
       live
       canEdit={m?.[0]?.role === "client_owner"}
       profilesHref="/app/outreach"
