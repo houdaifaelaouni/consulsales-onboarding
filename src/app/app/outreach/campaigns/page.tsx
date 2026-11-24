@@ -26,14 +26,16 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
   if (!workspaceId) return <Notice icon="waiting" title={t("dash.empty.title")} body={t("dash.empty.body")} />;
   const canEdit = m?.[0]?.role === "client_owner";
 
-  const [camps, counts, ready, cfg] = await Promise.all([
+  const [camps, counts, ready, cfg, sent] = await Promise.all([
     supabase.from("outreach_campaign").select("id,name,status,created_at").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
     supabase.rpc("outreach_campaign_counts", { p_ws: workspaceId }),
     supabase.rpc("outreach_unenrolled_approved", { p_ws: workspaceId }),
     supabase.from("outreach_settings").select("invites_per_day").eq("workspace_id", workspaceId).maybeSingle(),
+    supabase.rpc("outreach_send_counts", { p_ws: workspaceId }),
   ]);
   if (camps.error || counts.error || ready.error) return <Notice icon="error" title={t("outreach.error.title")} body={t("outreach.error.body")} />;
   const perDay = cfg.error || !cfg.data ? DEFAULT_PER_DAY : (cfg.data.invites_per_day as number);
+  const today = (sent.data ?? {}) as { invites?: number; messages?: number };
 
   let editing: { id: string; name: string; steps: StepInput[] } | null = null;
   if (edit && canEdit) {
@@ -54,6 +56,7 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
           <p className="text-md text-tertiary">{t("outreach.camp.subtitle")}</p>
         </div>
         <OutreachTabs current="campaigns" />
+        <p role="status" className="text-sm text-tertiary">{t("outreach.camp.today", "en", { invites: today.invites ?? 0, messages: today.messages ?? 0 })}</p>
       </header>
 
       <CampaignBuilder key={editing?.id ?? "new"} id={editing?.id ?? null} initialName={editing?.name ?? ""} initialSteps={editing?.steps ?? null} approvedLeads={Number(ready.data ?? 0)} perDay={perDay} canEdit={canEdit} />
