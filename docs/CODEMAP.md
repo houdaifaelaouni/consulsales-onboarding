@@ -1,7 +1,7 @@
 # Code map
 
 Read this first. It says what lives where, so you do not have to search the whole repo. Keep it short and update it in the
-same PR when a structure changes. Last checked against main at migration `20261115001000`.
+same PR when a structure changes. Last checked against main at migration `20261125000300`.
 
 ## One feature = one vertical slice
 `src/app/<route>/page.tsx` (server: loads data, checks the viewer) -> `src/components/<area>/*.tsx` (screen) ->
@@ -16,7 +16,7 @@ same PR when a structure changes. Last checked against main at migration `202611
 | Public | `page.tsx` (redirect), `login/page.tsx` (password, email link, sign-up, PIN keypad), `health/`, `auth/callback`, `auth/signout` |
 | Client `/app` (needs sign-in) | `app/page.tsx` home + tasks, `intake`, `access`, `deliverables` (+ `[id]`), `payments`, `booking` (still a sample), `account` (password + PIN) |
 | Admin `/admin` (admin only, layout guard) | `page.tsx` board, `clients/[id]` (detail + delivery panel), `integrations` (+ `actions.ts` saves keys to Vercel) |
-| API | `api/webhooks/whop` (payment -> workspace), `api/auth/pin-login` |
+| API | `api/webhooks/whop` (payment -> workspace), `api/auth/pin-login`, `api/cron/charge`, `api/cron/outreach` (sender), `api/webhooks/unipile/{connected,status,relations,messages}` |
 | Demo | `demo/*`, `welcome` (sample data, public) |
 
 ## Library map (`src/lib`)
@@ -31,6 +31,9 @@ same PR when a structure changes. Last checked against main at migration `202611
 - `agency/tiers.ts`: agency tier limits and prices (mirrors the SQL `agency_room_limit`), with tests.
 - `outreach/campaign.ts` (limits, validation, message placeholders, time estimate).
 - `outreach/leads.ts` (CSV parsing, LinkedIn url normalising), `outreach/owner.ts` (the signed-in client owner for server actions).
+- `outreach/settings.ts`: hard caps (20 invites, 50 messages a day, 06:00 to 22:00; same numbers as the `outreach_settings` checks), validation, sending state.
+- `outreach/sender.ts` (working window, warm-up ramp, daily budgets, what may send now), `send.ts` (one run: plan, send, record; ports for the database and Unipile), `supabase-send-repo.ts`.
+- `outreach/unipile-send.ts` (the only Unipile calls that contact people: profile id, invite, message), `replies.ts` (`new_relation` and `message_received` parsing), `supabase-reply-repo.ts`.
 - `outreach/`: `unipile.ts` (hosted LinkedIn login link, the only Unipile call), `connect.ts` (consent + single-use token flow), `status.ts` (webhook parsing), `secret.ts`; webhooks at `api/webhooks/unipile/{connected,status}`.
 - `plans.ts` (plans, default tasks; stage prices are still null), `nav.ts`, `home.ts`.
 
@@ -48,6 +51,7 @@ same PR when a structure changes. Last checked against main at migration `202611
 | 0900 | users may edit only name and locale; email unique and follows auth |
 | 1000 | event_log insert allow-list; approvals lock rows and name the version |
 | 20261122000100 | `agency`, `agency_member`, `workspace.agency_id`; tier room limit enforced by a trigger on workspace insert (free = 1 total, paid = N per month) |
+| 20261125000300 | `outreach_send_log`; due-send, run-workspace, capped send, failure, accepted and replied functions (service role only) |
 Each migration has a test in `supabase/tests/rls_*.sql` (ends with a "passed" select). Run both in the SQL editor; CI does not run them yet.
 
 ## Rules the database enforces (do not move these to the UI)

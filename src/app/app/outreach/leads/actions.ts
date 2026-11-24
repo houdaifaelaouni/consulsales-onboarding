@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { parseLeadsCsv, type SkipReason } from "@/lib/outreach/leads";
+import { parseLeadsCsv } from "@/lib/outreach/leads";
 import { getOwnerContext } from "@/lib/outreach/owner";
 
 export type ImportResult =
@@ -40,5 +40,3 @@ export async function approveAllNew(): Promise<StatusResult> {
   revalidatePath("/app/outreach/leads");
   return { ok: true, changed: data as number };
 }
-
-export type { SkipReason };
