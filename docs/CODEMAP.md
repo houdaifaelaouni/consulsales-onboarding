@@ -1,7 +1,7 @@
 # Code map
 
 Read this first. It says what lives where, so you do not have to search the whole repo. Keep it short and update it in the
-same PR when a structure changes. Last checked against main at migration `20261125000300`.
+same PR when a structure changes. Last checked against main at migration `20261126000500`.
 
 ## One feature = one vertical slice
 `src/app/<route>/page.tsx` (server: loads data, checks the viewer) -> `src/components/<area>/*.tsx` (screen) ->
@@ -15,9 +15,10 @@ same PR when a structure changes. Last checked against main at migration `202611
 |---|---|
 | Public | `page.tsx` (redirect), `login/page.tsx` (password, email link, sign-up, PIN keypad), `health/`, `auth/callback`, `auth/signout` |
 | Client `/app` (needs sign-in) | `app/page.tsx` home + tasks, `intake`, `access`, `deliverables` (+ `[id]`), `payments`, `booking` (still a sample), `account` (password + PIN) |
+| Outreach `/app/outreach` | `page.tsx` account + limits, `leads`, `campaigns` (list + create dialog), `campaigns/[id]` (Campaign = analytics + queue, `leads`, `build` = flow canvas, `accounts`, `test`), `agents` (AI Super Agents knowledge base) |
 | Admin `/admin` (admin only, layout guard) | `page.tsx` board, `clients/[id]` (detail + delivery panel), `integrations` (+ `actions.ts` saves keys to Vercel) |
 | API | `api/webhooks/whop` (payment -> workspace), `api/auth/pin-login`, `api/cron/charge`, `api/cron/outreach` (sender), `api/webhooks/unipile/{connected,status,relations,messages}` |
-| Demo | `demo/*`, `welcome` (sample data, public) |
+| Demo | `demo/*`, `demo/outreach` (+ `campaigns/[id]/{leads,build,accounts,test}`, `agents`) = the same outreach screens on `lib/outreach/sample.ts`, `welcome` (sample data, public) |
 
 ## Library map (`src/lib`)
 - `auth/`: `viewer.ts` (who is signed in + roles), `access.ts` (staff?), `paths.ts`, `pin.ts` (rules), `pin-status.ts` (server), `password.ts`, `secure-prompt.ts`.
@@ -35,6 +36,7 @@ same PR when a structure changes. Last checked against main at migration `202611
 - `outreach/sender.ts` (working window, warm-up ramp, daily budgets, what may send now), `send.ts` (one run: plan, send, record; ports for the database and Unipile), `supabase-send-repo.ts`.
 - `outreach/unipile-send.ts` (the only Unipile calls that contact people: profile id, invite, message), `replies.ts` (`new_relation` and `message_received` parsing), `supabase-reply-repo.ts`.
 - `outreach/`: `unipile.ts` (hosted LinkedIn login link, the only Unipile call), `connect.ts` (consent + single-use token flow), `status.ts` (webhook parsing), `secret.ts`; webhooks at `api/webhooks/unipile/{connected,status}`.
+- `outreach/workspace.ts` (screen shapes, channel list, name split, dates), `analytics.ts` (rates + queue buckets), `flow.ts` (steps -> canvas nodes/edges), `budget.ts` (split a daily limit across profiles), `testrun.ts` (deterministic Test Mode transcript), `agent.ts` (agent profile + limits), `sample.ts` (demo data only).
 - `plans.ts` (plans, default tasks; stage prices are still null), `nav.ts`, `home.ts`.
 
 ## Database (`supabase/migrations`, applied BY HAND in the Supabase SQL editor)
@@ -52,12 +54,18 @@ same PR when a structure changes. Last checked against main at migration `202611
 | 1000 | event_log insert allow-list; approvals lock rows and name the version |
 | 20261122000100 | `agency`, `agency_member`, `workspace.agency_id`; tier room limit enforced by a trigger on workspace insert (free = 1 total, paid = N per month) |
 | 20261125000300 | `outreach_send_log`; due-send, run-workspace, capped send, failure, accepted and replied functions (service role only) |
+| 20261126000100 | campaign `description`/`channel`/options; `outreach_campaign_create`, `outreach_campaign_duplicate` |
+| 20261126000200 | lead `first_name`/`last_name`/`email`/`phone`/`company_domain`/`location`/`platform`; names trigger; import reads them |
+| 20261126000300 | `outreach_enrollment.reply_class` + `meeting_booked_at`; `outreach_enrollment_classify` |
+| 20261126000400 | `outreach_campaign_account` (assign profiles); `outreach_campaign_accounts_set`; `outreach_campaign_analytics` |
+| 20261126000500 | `outreach_agent_profile` (one per workspace) + `outreach_agent_profile_save` |
 Each migration has a test in `supabase/tests/rls_*.sql` (ends with a "passed" select). Run both in the SQL editor; CI does not run them yet.
 
 ## Rules the database enforces (do not move these to the UI)
 - Clients cannot write `invoice`, approve by direct update, or edit versions. Only the checked functions and triggers do.
 - Approving names the version on screen and it must be the newest. No new version during review.
 - `event_log` is append-only; members may insert only `intake.saved` with a count.
+- Outreach campaigns, leads, enrollments, send log, campaign profiles and the agent profile are read-only for the browser; every write is a checked function (`has_role(ws, 'client_owner')`), and the 20/50 daily caps stay in `outreach_record_send`.
 - `user_pin` is unreadable from the browser; only the service role calls `pin_*`.
 
 ## Gotchas learned the hard way

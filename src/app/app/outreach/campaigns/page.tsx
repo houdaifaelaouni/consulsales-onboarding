@@ -1,23 +1,27 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronRight } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
-import { CampaignBuilder } from "@/components/outreach/campaign-builder";
+import { ProgressBarBase } from "@/components/base/progress-indicators/progress-indicators";
 import { CampaignControls } from "@/components/outreach/campaign-controls";
+import { DuplicateButton } from "@/components/outreach/campaign/duplicate-button";
+import { STATUS_LABEL, STATUS_TONE } from "@/components/outreach/campaign/status";
+import { NewCampaignDialog } from "@/components/outreach/new-campaign-dialog";
+import { PlatformDot, PlatformFilter } from "@/components/outreach/platform-pills";
 import { OutreachTabs } from "@/components/outreach/tabs";
 import { Notice } from "@/components/shell/notice";
 import { t } from "@/lib/i18n";
-import type { StepInput } from "@/lib/outreach/campaign";
+import { campaignProgress } from "@/lib/outreach/analytics";
+import { DEFAULT_SETTINGS, shortTime } from "@/lib/outreach/settings";
+import { formatDate, type CampaignStatus, type Channel } from "@/lib/outreach/workspace";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_COLOR = { draft: "gray", active: "success", paused: "warning", completed: "gray" } as const;
-const STATUS_KEY = { draft: "outreach.camp.s.draft", active: "outreach.camp.s.active", paused: "outreach.camp.s.paused", completed: "outreach.camp.s.completed" } as const;
-const STATES = ["active", "replied", "completed", "stopped", "failed"] as const;
-const STATE_KEY = { active: "outreach.camp.n.active", replied: "outreach.camp.n.replied", completed: "outreach.camp.n.completed", stopped: "outreach.camp.n.stopped", failed: "outreach.camp.n.failed" } as const;
-const DEFAULT_PER_DAY = 12;
+const BASE = "/app/outreach/campaigns";
 
-export default async function CampaignsPage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
-  const { edit } = await searchParams;
+export default async function CampaignsPage({ searchParams }: { searchParams: Promise<{ platform?: string }> }) {
+  const { platform } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -26,67 +30,95 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
   if (!workspaceId) return <Notice icon="waiting" title={t("dash.empty.title")} body={t("dash.empty.body")} />;
   const canEdit = m?.[0]?.role === "client_owner";
 
-  const [camps, counts, ready, cfg, sent] = await Promise.all([
-    supabase.from("outreach_campaign").select("id,name,status,created_at").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
+  const [camps, counts, cfg] = await Promise.all([
+    supabase.from("outreach_campaign").select("id,name,description,status,channel,created_at").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
     supabase.rpc("outreach_campaign_counts", { p_ws: workspaceId }),
-    supabase.rpc("outreach_unenrolled_approved", { p_ws: workspaceId }),
-    supabase.from("outreach_settings").select("invites_per_day").eq("workspace_id", workspaceId).maybeSingle(),
-    supabase.rpc("outreach_send_counts", { p_ws: workspaceId }),
+    supabase.from("outreach_settings").select("work_start,work_end,weekdays_only").eq("workspace_id", workspaceId).maybeSingle(),
   ]);
-  if (camps.error || counts.error || ready.error) return <Notice icon="error" title={t("outreach.error.title")} body={t("outreach.error.body")} />;
-  const perDay = cfg.error || !cfg.data ? DEFAULT_PER_DAY : (cfg.data.invites_per_day as number);
-  const today = (sent.data ?? {}) as { invites?: number; messages?: number };
+  if (camps.error || counts.error) return <Notice icon="error" title={t("outreach.error.title")} body={t("outreach.error.body")} />;
 
-  let editing: { id: string; name: string; steps: StepInput[] } | null = null;
-  if (edit && canEdit) {
-    const draft = (camps.data ?? []).find((c) => c.id === edit && c.status === "draft");
-    if (draft) {
-      const { data: st } = await supabase.from("outreach_step").select("position,delay_days,body").eq("campaign_id", draft.id as string).order("position");
-      editing = { id: draft.id as string, name: draft.name as string, steps: (st ?? []).map((s) => ({ delayDays: s.delay_days as number, body: s.body as string })) };
-    }
-  }
   const byCampaign = new Map<string, Record<string, number>>();
-  for (const c of (counts.data ?? []) as Array<{ campaign_id: string; state: string; n: number }>) byCampaign.set(c.campaign_id, { ...(byCampaign.get(c.campaign_id) ?? {}), [c.state]: Number(c.n) });
+  for (const c of (counts.data ?? []) as Array<{ campaign_id: string; state: string; n: number }>) {
+    byCampaign.set(c.campaign_id, { ...(byCampaign.get(c.campaign_id) ?? {}), [c.state]: Number(c.n) });
+  }
+
+  const all = (camps.data ?? []).map((c) => {
+    const states = byCampaign.get(c.id as string) ?? {};
+    const leads = Object.values(states).reduce((n, v) => n + Number(v), 0);
+    return {
+      id: c.id as string, name: c.name as string, description: (c.description as string | null) ?? null,
+      status: c.status as CampaignStatus, channel: ((c.channel as string | null) ?? "LINKEDIN").toLowerCase() as Channel,
+      createdAt: c.created_at as string, leads,
+      progress: campaignProgress(Number(states.completed ?? 0), leads),
+    };
+  });
+  const active = platform && platform !== "all" ? all.filter((c) => c.channel === platform) : all;
+  const platformCounts = { all: all.length, linkedin: all.filter((c) => c.channel === "linkedin").length };
+  const hours = cfg.data ? `${shortTime(cfg.data.work_start as string)} – ${shortTime(cfg.data.work_end as string)}` : `${DEFAULT_SETTINGS.workStart} – ${DEFAULT_SETTINGS.workEnd}`;
+  const days = cfg.data?.weekdays_only ? t("outreach.cl.weekdays") : t("outreach.cl.everyDay");
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8 lg:px-8">
-      <header className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-sm font-semibold text-primary">{t("outreach.camp.title")}</h1>
-          <p className="text-md text-tertiary">{t("outreach.camp.subtitle")}</p>
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 lg:px-8">
+      <header className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-display-sm font-semibold text-primary">{t("outreach.cl.title")}</h1>
+            <p className="text-md text-tertiary">{t("outreach.cl.subtitle")}</p>
+          </div>
+          <NewCampaignDialog base={BASE} live canEdit={canEdit} hours={hours} days={days} sessions={t("outreach.cl.sessions")} />
         </div>
         <OutreachTabs current="campaigns" />
-        <p role="status" className="text-sm text-tertiary">{t("outreach.camp.today", "en", { invites: today.invites ?? 0, messages: today.messages ?? 0 })}</p>
+        <PlatformFilter current={(platform as Channel | "all") ?? "all"} href={(c) => `${BASE}?platform=${c}`} counts={platformCounts} />
       </header>
 
-      <CampaignBuilder key={editing?.id ?? "new"} id={editing?.id ?? null} initialName={editing?.name ?? ""} initialSteps={editing?.steps ?? null} approvedLeads={Number(ready.data ?? 0)} perDay={perDay} canEdit={canEdit} />
-
-      <section aria-labelledby="camp-list" className="flex flex-col gap-3">
-        <h2 id="camp-list" className="text-lg font-semibold text-primary">{t("outreach.camp.list")}</h2>
-        {(camps.data ?? []).length === 0 ? <p role="status" className="rounded-xl bg-secondary p-4 text-sm text-secondary">{t("outreach.camp.none")}</p> : (
-          <ul className="flex flex-col gap-3">
-            {(camps.data ?? []).map((c) => {
-              const n = byCampaign.get(c.id as string) ?? {};
-              const status = c.status as keyof typeof STATUS_KEY;
-              return (
-                <li key={c.id as string} className="flex flex-col gap-3 rounded-xl bg-primary p-5 ring-1 ring-secondary">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-md font-semibold text-primary">{c.name as string}</span>
-                    <Badge size="sm" color={STATUS_COLOR[status]}>{t(STATUS_KEY[status])}</Badge>
+      {active.length === 0 ? (
+        <p className="rounded-2xl border border-secondary bg-primary p-8 text-center text-sm text-tertiary">
+          {all.length === 0 ? t("outreach.cl.none") : t("outreach.cl.nonePlatform")}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {active.map((c) => (
+            <li key={c.id} className="flex flex-col gap-4 rounded-2xl border border-secondary bg-primary p-5">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary"><PlatformDot channel={c.channel} className="size-4" /></span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`${BASE}/${c.id}`} className="text-md font-semibold text-primary hover:underline">{c.name}</Link>
+                      <Badge size="sm" color="gray">{t(c.channel === "linkedin" ? "outreach.ch.linkedin" : "outreach.ch.linkedin")}</Badge>
+                      <Badge size="sm" color={STATUS_TONE[c.status]}>{t(STATUS_LABEL[c.status])}</Badge>
+                    </div>
+                    <p className="text-sm text-tertiary">{c.description ?? t("outreach.cl.noDescription")}</p>
                   </div>
-                  {status !== "draft" && (
-                    <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
-                      {STATES.map((s) => <div key={s}><dt className="text-tertiary">{t(STATE_KEY[s])}</dt><dd className="font-semibold text-primary">{n[s] ?? 0}</dd></div>)}
-                    </dl>
+                </div>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  {c.status === "draft" && canEdit && (
+                    <Link href={`${BASE}/${c.id}/build`} className="rounded-lg bg-brand-solid px-3 py-2 text-sm font-semibold text-white">{t("outreach.camp.editLink")}</Link>
                   )}
-                  {status === "draft" && canEdit && <a className="text-sm font-semibold text-brand-secondary underline" href={`/app/outreach/campaigns?edit=${c.id as string}`}>{t("outreach.camp.editLink")}</a>}
-                  {(status === "active" || status === "paused") && <CampaignControls id={c.id as string} status={status} canEdit={canEdit} />}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+                  <DuplicateButton id={c.id} canEdit={canEdit} />
+                  {(c.status === "active" || c.status === "paused") && (
+                    <CampaignControls id={c.id} status={c.status} canEdit={canEdit} />
+                  )}
+                  <Link href={`${BASE}/${c.id}`} aria-label={t("outreach.cl.open")}
+                    className="grid size-9 place-items-center rounded-lg border border-secondary text-secondary hover:bg-secondary">
+                    <ChevronRight aria-hidden className="size-4" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs text-tertiary">
+                  <span>{t("outreach.cl.progress", "en", { n: c.progress })}</span>
+                  <span>{t("outreach.cl.leadsCreated", "en", { n: new Intl.NumberFormat("en-US").format(c.leads) })}</span>
+                </div>
+                <ProgressBarBase value={c.progress} max={100} aria-label={t("outreach.cl.progress", "en", { n: c.progress })} />
+              </div>
+
+              <p className="text-xs text-tertiary">{t("outreach.cl.created", "en", { date: formatDate(c.createdAt) })}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }

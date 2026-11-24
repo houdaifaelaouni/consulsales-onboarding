@@ -56,3 +56,53 @@ export async function setCampaignStatus(id: string, status: "active" | "paused")
   revalidatePath("/app/outreach/campaigns");
   return { ok: true, count: 0 };
 }
+
+export type CreateResult = { ok: true; id: string } | { ok: false; reason: "forbidden" | "name" | "failed" };
+
+export interface CampaignOptions {
+  engage_before: boolean;
+  engage_after: boolean;
+  contact_again_days: number | null;
+  skip_existing: boolean;
+  warmup_mode: boolean;
+}
+
+/** Creates an empty draft from the create dialog. The Build tab fills in the steps and launches it. */
+export async function createCampaign(input: {
+  name: string; description: string; channel: "LINKEDIN"; options: CampaignOptions;
+}): Promise<CreateResult> {
+  const ctx = await getOwnerContext();
+  if (!ctx) return { ok: false, reason: "forbidden" };
+  const name = input.name.trim();
+  if (name.length < 1 || name.length > 80) return { ok: false, reason: "name" };
+  const { data, error } = await ctx.supabase.rpc("outreach_campaign_create", {
+    p_ws: ctx.workspaceId, p_name: name, p_description: input.description, p_channel: input.channel, p_options: input.options,
+  });
+  if (error) return { ok: false, reason: /not allowed/i.test(error.message) ? "forbidden" : "failed" };
+  revalidatePath("/app/outreach/campaigns");
+  return { ok: true, id: data as string };
+}
+
+/** Copies a campaign and its steps into a new draft. Enrollments stay with the original. */
+export async function duplicateCampaign(id: string): Promise<CreateResult> {
+  const ctx = await getOwnerContext();
+  if (!ctx) return { ok: false, reason: "forbidden" };
+  const { data, error } = await ctx.supabase.rpc("outreach_campaign_duplicate", { p_ws: ctx.workspaceId, p_id: id });
+  if (error) return { ok: false, reason: /not allowed|unknown/i.test(error.message) ? "forbidden" : "failed" };
+  revalidatePath("/app/outreach/campaigns");
+  return { ok: true, id: data as string };
+}
+
+export type AssignResult = { ok: true; count: number } | { ok: false; reason: "forbidden" | "failed" };
+
+/** Picks which connected profiles run this campaign. Accounts from other workspaces are ignored by the database. */
+export async function assignCampaignAccounts(id: string, accountIds: string[]): Promise<AssignResult> {
+  const ctx = await getOwnerContext();
+  if (!ctx) return { ok: false, reason: "forbidden" };
+  const { data, error } = await ctx.supabase.rpc("outreach_campaign_accounts_set", {
+    p_ws: ctx.workspaceId, p_campaign: id, p_accounts: accountIds,
+  });
+  if (error) return { ok: false, reason: /not allowed|unknown/i.test(error.message) ? "forbidden" : "failed" };
+  revalidatePath(`/app/outreach/campaigns/${id}/accounts`);
+  return { ok: true, count: data as number };
+}

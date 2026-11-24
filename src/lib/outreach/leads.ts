@@ -2,7 +2,10 @@
 export const MAX_ROWS = 5000;
 export const MAX_FILE_BYTES = 1_000_000;
 
-export interface ParsedLead { full_name: string; title: string; company: string; linkedin_key: string; linkedin_url: string }
+export interface ParsedLead {
+  full_name: string; title: string; company: string; linkedin_key: string; linkedin_url: string;
+  first_name?: string; last_name?: string; email?: string; phone?: string; company_domain?: string; location?: string;
+}
 export type SkipReason = "no_name" | "no_profile" | "not_a_profile" | "duplicate_in_file";
 export interface ParseResult {
   rows: ParsedLead[];
@@ -58,13 +61,17 @@ export function parseCsv(text: string): string[][] {
 }
 
 const norm = (h: string) => h.toLowerCase().replace(/[^a-z0-9]/g, "");
-const ALIASES: Record<"name" | "first" | "last" | "title" | "company" | "url", string[]> = {
+const ALIASES: Record<"name" | "first" | "last" | "title" | "company" | "url" | "email" | "phone" | "domain" | "location", string[]> = {
   name: ["name", "fullname", "contactname", "person"],
   first: ["firstname", "first", "givenname"],
   last: ["lastname", "last", "surname", "familyname"],
   title: ["title", "jobtitle", "position", "role", "headline"],
   company: ["company", "companyname", "organization", "organisation", "employer"],
   url: ["linkedin", "linkedinurl", "linkedinprofile", "linkedinprofileurl", "profileurl", "profile", "url", "personlinkedinurl"],
+  email: ["email", "emailaddress", "workemail", "mail", "e-mail"],
+  phone: ["phone", "phonenumber", "mobile", "mobilenumber", "tel", "telephone"],
+  domain: ["companydomain", "domain", "website", "companywebsite", "companyurl"],
+  location: ["location", "city", "country", "region", "locationcity"],
 };
 
 export function parseLeadsCsv(text: string): ParseResult {
@@ -74,7 +81,10 @@ export function parseLeadsCsv(text: string): ParseResult {
   if (table.length < 2) return fail("empty");
   const header = table[0].map(norm);
   const col = (k: keyof typeof ALIASES) => header.findIndex((h) => ALIASES[k].includes(h));
-  const idx = { name: col("name"), first: col("first"), last: col("last"), title: col("title"), company: col("company"), url: col("url") };
+  const idx = {
+    name: col("name"), first: col("first"), last: col("last"), title: col("title"), company: col("company"), url: col("url"),
+    email: col("email"), phone: col("phone"), domain: col("domain"), location: col("location"),
+  };
   if (idx.url < 0 || (idx.name < 0 && idx.first < 0)) return fail("no_columns");
   if (table.length - 1 > MAX_ROWS) return fail("too_many");
 
@@ -92,7 +102,15 @@ export function parseLeadsCsv(text: string): ParseResult {
     if (!p) { skipped.push({ line, reason: "not_a_profile" }); return; }
     if (seen.has(p.key)) { skipped.push({ line, reason: "duplicate_in_file" }); return; }
     seen.add(p.key);
-    rows.push({ full_name: full.slice(0, 120), title: get(idx.title).slice(0, 160), company: get(idx.company).slice(0, 160), linkedin_key: p.key, linkedin_url: p.url });
+    // Extra columns are kept only when the file has them, so an older list still imports the same five fields.
+    const extra: Partial<ParsedLead> = {};
+    if (get(idx.first)) extra.first_name = get(idx.first).slice(0, 80);
+    if (get(idx.last)) extra.last_name = get(idx.last).slice(0, 80);
+    if (get(idx.email)) extra.email = get(idx.email).slice(0, 200);
+    if (get(idx.phone)) extra.phone = get(idx.phone).slice(0, 40);
+    if (get(idx.domain)) extra.company_domain = get(idx.domain).slice(0, 160);
+    if (get(idx.location)) extra.location = get(idx.location).slice(0, 160);
+    rows.push({ full_name: full.slice(0, 120), title: get(idx.title).slice(0, 160), company: get(idx.company).slice(0, 160), linkedin_key: p.key, linkedin_url: p.url, ...extra });
   });
   return { rows, skipped, error: rows.length === 0 ? "empty" : null };
 }
