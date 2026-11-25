@@ -13,6 +13,8 @@ export const DEMO_NAV: NavItem[] = [
   { href: "/demo/booking", label: "nav.booking", icon: "booking" },
   { href: "/demo/admin", label: "nav.clients", icon: "clients" },
   { href: "/demo/integrations", label: "nav.integrations", icon: "integrations" },
+  { href: "/demo/outreach", label: "nav.outreach", icon: "overview" },
+  { href: "/demo/outreach/agents", label: "outreach.tabs.agents", icon: "review" },
   { href: "/welcome", label: "nav.welcome", icon: "welcome" },
 ];
 

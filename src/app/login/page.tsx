@@ -147,6 +147,14 @@ export default function LoginPage() {
           </>
         )}
 
+        <section className="flex w-full flex-col items-center gap-3 rounded-xl border border-secondary bg-secondary px-5 py-5 text-center">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold text-primary">{t("login.demo.title")}</h2>
+            <p className="text-sm text-tertiary">{t("login.demo.body")}</p>
+          </div>
+          <Button color="secondary" size="lg" href="/demo">{t("login.demo.cta")}</Button>
+        </section>
+
         <div className="flex flex-col items-center gap-2 text-center text-sm text-tertiary">
           <p>{t("login.help")}</p>
           <p className="flex items-center gap-1.5 text-quaternary"><Lock01 aria-hidden className="size-4" />{t("login.secure")}</p>

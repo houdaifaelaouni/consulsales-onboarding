@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ConnectCard, type AccountView } from "@/components/outreach/connect-card";
 import { SettingsCard } from "@/components/outreach/settings-card";
+import { OutreachTabs } from "@/components/outreach/tabs";
 import { Notice } from "@/components/shell/notice";
 import { t } from "@/lib/i18n";
 import { NOTICE_VERSION } from "@/lib/outreach/connect";
@@ -37,9 +38,12 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
 
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8 lg:px-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-display-sm font-semibold text-primary">{t("outreach.title")}</h1>
-        <p className="text-md text-tertiary">{t("outreach.subtitle")}</p>
+      <header className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-display-sm font-semibold text-primary">{t("outreach.title")}</h1>
+          <p className="text-md text-tertiary">{t("outreach.subtitle")}</p>
+        </div>
+        <OutreachTabs current="account" />
       </header>
       {connected && <p role="status" className="rounded-xl bg-secondary p-4 text-sm text-secondary ring-1 ring-secondary">{t("outreach.justConnected")}</p>}
       {failed && <p role="alert" className="rounded-xl bg-error-primary p-4 text-sm text-error-primary">{t("outreach.error.failed")}</p>}
