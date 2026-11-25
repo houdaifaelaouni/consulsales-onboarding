@@ -15,12 +15,6 @@ export const DEMO_NAV: NavItem[] = [
   { href: "/demo/integrations", label: "nav.integrations", icon: "integrations" },
   { href: "/demo/outreach", label: "nav.outreach", icon: "overview" },
   { href: "/demo/outreach/agents", label: "outreach.tabs.agents", icon: "review" },
-  { href: "/demo/agency", label: "nav.demoAgency", icon: "clients" },
-  { href: "/demo/agency/retention", label: "nav.demoRetention", icon: "review" },
-  { href: "/demo/agency/icp", label: "nav.demoIcp", icon: "intake" },
-  { href: "/demo/agency/deposit", label: "nav.demoDeposit", icon: "payments" },
-  { href: "/demo/agency/brand", label: "nav.demoBrand", icon: "welcome" },
-  { href: "/demo/agency/admin", label: "nav.demoAgencies", icon: "clients" },
   { href: "/welcome", label: "nav.welcome", icon: "welcome" },
 ];
 
@@ -50,7 +44,7 @@ export const ADMIN_NAV: NavItem[] = [
 export function isActive(pathname: string, href: string, opts: { exact?: boolean } = {}): boolean {
   const path = pathname.replace(/\/+$/, "") || "/";
   if (href === "/admin") return path === href || path.startsWith("/admin/clients/"); // the clients board owns its detail pages
-  if (opts.exact || href === "/app" || href === "/demo" || href === "/demo/agency") return path === href;
+  if (opts.exact || href === "/app" || href === "/demo") return path === href;
   return path === href || path.startsWith(`${href}/`);
 }
 
